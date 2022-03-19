@@ -5,7 +5,7 @@ IPFOUND=
 # Determine Current OS Version
 OSVERSION=`uname -a | awk '{print $3}' | awk 'BEGIN {FS = "."} ; {print $1}'`
 # Get list of possible wired ethernet interfaces
-INTERFACES=`networksetup -listnetworkserviceorder | grep "Hardware Port" | grep "Ethernet" | awk -F ": " '{print $3}'  | sed 's/)//g'`
+INTERFACES=`networksetup -listnetworkserviceorder | grep "Hardware Port" | grep "Ethernet\|LAN" | awk -F ": " '{print $3}'  | sed 's/)//g'`
 # Get list of Wireless Interfaces
 WIFIINTERFACES=`networksetup -listallhardwareports | tr '\n' ' ' | sed -e 's/Hardware Port:/\'$'\n/g' | grep Wi-Fi | awk '{print $3}'`
  
