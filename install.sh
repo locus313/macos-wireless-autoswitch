@@ -1,13 +1,21 @@
 #!/bin/bash
 
-sudo mkdir -p /Library/Scripts/NetBasics/
+NETBASICS_PATH="/Library/Scripts/NetBasics"
+LAUNCHDAEMONS_PATH="/Library/LaunchDaemons"
 
-sudo cp wireless.sh /Library/Scripts/NetBasics/
+SUDO=''
+if [[ $(id -u) -ne 0 ]]; then
+    SUDO='sudo'
+fi
 
-sudo chmod 755 /Library/Scripts/NetBasics/wireless.sh
+$SUDO mkdir -p $NETBASICS_PATH
 
-sudo mkdir -p /Library/LaunchDaemons/
+$SUDO cp wireless.sh $NETBASICS_PATH
 
-sudo cp com.computernetworkbasics.wifionoff.plist /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
+$SUDO chmod 755 $NETBASICS_PATH/wireless.sh
 
-sudo chown root:wheel /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
+$SUDO mkdir -p $LAUNCHDAEMONS_PATH
+
+$SUDO cp com.computernetworkbasics.wifionoff.plist $LAUNCHDAEMONS_PATH/com.computernetworkbasics.wifionoff.plist
+
+$SUDO chown root:wheel $LAUNCHDAEMONS_PATH/com.computernetworkbasics.wifionoff.plist
