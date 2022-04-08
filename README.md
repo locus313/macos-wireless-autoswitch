@@ -3,6 +3,8 @@ macos-wireless-autoswitch
 Automatically turn off wireless in macos when you connect to a LAN.
 
 * [Installation](#installation)
+* [Uninstall](#uninstall)
+* [Update](#update)
 
 Installation
 ------------
@@ -13,10 +15,26 @@ Requirements:
 
 Clone the repo or download a source zip.
 
-run the install script
+run the install script with the install option
 
+```bash
+./install.sh i
 ```
-./install.sh
+
+Uninstall
+------------
+run the install script with the uninstall option
+
+```bash
+./install.sh ui
+```
+
+Update
+------------
+run the install script with the update option
+
+```bash
+./install.sh up
 ```
 
 Authors & Contributors
