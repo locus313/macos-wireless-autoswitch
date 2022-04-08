@@ -11,7 +11,7 @@ Requirements:
 
 * bash (recommend version 4+)
 
-Clone the repo, download a source zip or copy the shell scripts as needed.
+Clone the repo or download a source zip.
 
 run the install script
 
