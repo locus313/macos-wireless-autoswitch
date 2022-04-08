@@ -35,8 +35,6 @@ function _switch() {
             _sudo
             $SUDO rm -Rf $NETBASICS_PATH/wireless.sh;
             $SUDO rm -Rf $LAUNCHDAEMONS_PATH/com.computernetworkbasics.wifionoff.plist;
-            $SUDO rm -Rf $NETBASICS_PATH;
-            $SUDO rm -Rf $LAUNCHDAEMONS_PATH;
             ;;
         ""|"up"|"update"|"3")
             _sudo
