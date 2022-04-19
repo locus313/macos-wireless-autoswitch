@@ -18,14 +18,22 @@ function _sudo() {
     fi
 }
 
+function _mkdir() {
+    if [! -d $NETBASICS_PATH ]; then
+            $SUDO mkdir -p $NETBASICS_PATH;
+    fi
+    if [! -d $LAUNCHDAEMONS_PATH ]; then
+            $SUDO mkdir -p $LAUNCHDAEMONS_PATH;
+    fi
+}
+
 function _switch() {
     _reply="$1"
 
     case $_reply in
         ""|"i"|"install"|"1")
             _sudo
-            $SUDO mkdir -p $NETBASICS_PATH;
-            $SUDO mkdir -p $LAUNCHDAEMONS_PATH;
+            _mkdir
             $SUDO cp wireless.sh $NETBASICS_PATH;
             $SUDO cp com.computernetworkbasics.wifionoff.plist $LAUNCHDAEMONS_PATH/com.computernetworkbasics.wifionoff.plist;
             $SUDO chmod 755 $NETBASICS_PATH/wireless.sh;
