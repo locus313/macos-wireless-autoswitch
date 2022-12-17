@@ -19,29 +19,8 @@ do
   fi
 done
  
- 
-# For OSX 10.5 (#9) Leopard
-if [ "$OSVERSION" == "9" ]; then
-  if [ $IPFOUND ]; then
-    /usr/sbin/networksetup -setairportpower off || exit 1
-    logger "wireless.sh: turning off wireless card because an IP was found on a wired card."
-  else
-    /usr/sbin/networksetup -setairportpower on || exit 1
-    logger "wireless.sh: turning on wireless card because NO IP was found on a wired card."
-  fi
- 
-# For OSX 10.6 (#10) Snow Leopard
-elif [ "$OSVERSION" == "10" ]; then
-  if [ $IPFOUND ]; then
-    /usr/sbin/networksetup -setairportpower "$WIFIINTERFACES" off || exit 1
-    logger "wireless.sh: turning off wireless card ($WIFIINTERFACES) because an IP was found on a wired card."
-  else
-    /usr/sbin/networksetup -setairportpower "$WIFIINTERFACES" on || exit 1
-    logger "wireless.sh: turning on wireless card ($WIFIINTERFACES) because NO IP was found on a wired card."
-  fi
- 
 # For OSX 10.7 (#11) Lion and OSX 10.8 (#12) Mountain Lion and 10.9 (#13) Mavericks, Yosemite (#14), El Capitan (#15), Sierra (#16), High Sierra (#17), Mojave (#18), Catalina (#19), Big Sur (#20), Monterey (#21), Ventura (#22)
-elif [ "$OSVERSION" == "11" ] || [ "$OSVERSION" == "12" ] || [ "$OSVERSION" == "13" ] || [ "$OSVERSION" == "14" ] || [ "$OSVERSION" == "15" ] || [ "$OSVERSION" == "16" ] || [ "$OSVERSION" == "17" ] || [ "$OSVERSION" == "18" ] || [ "$OSVERSION" == "19" ] || [ "$OSVERSION" == "20" ] || [ "$OSVERSION" == "21" ] || [ "$OSVERSION" == "22" ]; then
+if [ "$OSVERSION" == "11" ] || [ "$OSVERSION" == "12" ] || [ "$OSVERSION" == "13" ] || [ "$OSVERSION" == "14" ] || [ "$OSVERSION" == "15" ] || [ "$OSVERSION" == "16" ] || [ "$OSVERSION" == "17" ] || [ "$OSVERSION" == "18" ] || [ "$OSVERSION" == "19" ] || [ "$OSVERSION" == "20" ] || [ "$OSVERSION" == "21" ] || [ "$OSVERSION" == "22" ]; then
   if [ $IPFOUND ]; then
     /usr/sbin/networksetup -setairportpower "$WIFIINTERFACES" off || exit 1
     echo "Turning OFF wireless on card $WIFIINTERFACES."
