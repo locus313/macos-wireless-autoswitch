@@ -23,7 +23,7 @@ jobs:
     - name: Install validation tools
       run: |
         sudo apt-get update
-        sudo apt-get install -y shellcheck xmllint
+        sudo apt-get install -y shellcheck libxml2-utils
     
     - name: Validate shell scripts
       run: |
@@ -185,7 +185,7 @@ jobs:
         fi
         
         # Check for supported OS versions
-        if grep -q '"22"\|"23"\|"24"' wireless.sh; then
+        if grep -q "22|23|24" wireless.sh; then
           echo "✅ Supported macOS versions defined (Ventura, Sonoma, Sequoia)"
         else
           echo "❌ macOS version support not properly defined"
