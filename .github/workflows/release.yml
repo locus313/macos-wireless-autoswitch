@@ -1,0 +1,211 @@
+name: Create Release
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'wireless.sh'
+      - 'install.sh'
+      - 'com.computernetworkbasics.wifionoff.plist'
+    types: [ closed ]
+
+jobs:
+  release:
+    # Only run on merged PRs
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+      pull-requests: read
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Get latest tag
+      id: get_latest_tag
+      run: |
+        # Get the latest tag, or use v1.0.0 if no tags exist
+        LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
+        echo "latest_tag=$LATEST_TAG" >> $GITHUB_OUTPUT
+        echo "Latest tag: $LATEST_TAG"
+    
+    - name: Generate new version
+      id: generate_version
+      run: |
+        LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+        
+        # Remove 'v' prefix if present
+        VERSION=${LATEST_TAG#v}
+        
+        # Split version into parts
+        IFS='.' read -r -a VERSION_PARTS <<< "$VERSION"
+        MAJOR=${VERSION_PARTS[0]:-1}
+        MINOR=${VERSION_PARTS[1]:-0}
+        PATCH=${VERSION_PARTS[2]:-0}
+        
+        # Increment patch version
+        PATCH=$((PATCH + 1))
+        
+        NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+        echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "New version: $NEW_VERSION"
+    
+    - name: Check for changes in core files
+      id: check_changes
+      run: |
+        # Check if any of the core files have changed since the last tag
+        LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+        
+        if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
+          CHANGED_FILES=$(git diff --name-only "$LATEST_TAG"..HEAD -- wireless.sh install.sh com.computernetworkbasics.wifionoff.plist)
+        else
+          # If no previous tag exists, consider files as changed
+          CHANGED_FILES="wireless.sh install.sh com.computernetworkbasics.wifionoff.plist"
+        fi
+        
+        if [ -n "$CHANGED_FILES" ]; then
+          echo "changes_detected=true" >> $GITHUB_OUTPUT
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+        else
+          echo "changes_detected=false" >> $GITHUB_OUTPUT
+          echo "No changes detected in core files since last release"
+        fi
+    
+    - name: Generate release notes
+      id: release_notes
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      run: |
+        LATEST_TAG="${{ steps.get_latest_tag.outputs.latest_tag }}"
+        NEW_VERSION="${{ steps.generate_version.outputs.new_version }}"
+        
+        # Create release notes
+        echo "## Changes in $NEW_VERSION" > release_notes.md
+        echo "" >> release_notes.md
+        
+        if git rev-parse "$LATEST_TAG" >/dev/null 2>&1; then
+          echo "### Updated Files" >> release_notes.md
+          CHANGED_FILES=$(git diff --name-only "$LATEST_TAG"..HEAD -- wireless.sh install.sh com.computernetworkbasics.wifionoff.plist)
+          for file in $CHANGED_FILES; do
+            echo "- \`$file\`" >> release_notes.md
+          done
+          echo "" >> release_notes.md
+          
+          echo "### Commit History" >> release_notes.md
+          git log "$LATEST_TAG"..HEAD --oneline --format="- %s (%h)" >> release_notes.md
+        else
+          echo "### Initial Release" >> release_notes.md
+          echo "This is the initial release of macOS Wireless Auto-Switch utility." >> release_notes.md
+          echo "" >> release_notes.md
+          echo "### Core Components" >> release_notes.md
+          echo "- \`wireless.sh\` - Main logic script for WiFi auto-switching" >> release_notes.md
+          echo "- \`install.sh\` - Installation and management script" >> release_notes.md
+          echo "- \`com.computernetworkbasics.wifionoff.plist\` - LaunchDaemon configuration" >> release_notes.md
+        fi
+        
+        echo "" >> release_notes.md
+        echo "### Installation" >> release_notes.md
+        echo "1. Download the release archive" >> release_notes.md
+        echo "2. Extract the files" >> release_notes.md
+        echo "3. Run \`./install.sh i\` to install" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "### Compatibility" >> release_notes.md
+        echo "- macOS Ventura (13.x)" >> release_notes.md
+        echo "- macOS Sonoma (14.x)" >> release_notes.md
+        echo "- macOS Sequoia (15.x)" >> release_notes.md
+    
+    - name: Create release archive
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      run: |
+        NEW_VERSION="${{ steps.generate_version.outputs.new_version }}"
+        ARCHIVE_NAME="macos-wireless-autoswitch-$NEW_VERSION"
+        
+        # Create archive directory
+        mkdir -p "$ARCHIVE_NAME"
+        
+        # Copy core files
+        cp wireless.sh "$ARCHIVE_NAME/"
+        cp install.sh "$ARCHIVE_NAME/"
+        cp com.computernetworkbasics.wifionoff.plist "$ARCHIVE_NAME/"
+        cp README.md "$ARCHIVE_NAME/"
+        cp LICENSE "$ARCHIVE_NAME/"
+        
+        # Create installation instructions
+        {
+          echo "macOS Wireless Auto-Switch Installation Instructions"
+          echo "=================================================="
+          echo ""
+          echo "1. Open Terminal and navigate to this directory"
+          echo "2. Make the install script executable:"
+          echo "   chmod +x install.sh"
+          echo "3. Run the installer:"
+          echo "   ./install.sh i"
+          echo "4. The utility will now automatically toggle WiFi when wired connections are detected"
+          echo ""
+          echo "Uninstallation:"
+          echo "   ./install.sh ui"
+          echo ""
+          echo "Update:"
+          echo "   ./install.sh up"
+          echo ""
+          echo "For more information, see README.md"
+        } > "$ARCHIVE_NAME/INSTALL.txt"
+        
+        # Create tar.gz archive
+        tar -czf "$ARCHIVE_NAME.tar.gz" "$ARCHIVE_NAME"
+        
+        # Create zip archive for broader compatibility
+        zip -r "$ARCHIVE_NAME.zip" "$ARCHIVE_NAME"
+        
+        echo "archive_name=$ARCHIVE_NAME" >> $GITHUB_ENV
+    
+    - name: Create Release
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.generate_version.outputs.new_version }}
+        release_name: macOS Wireless Auto-Switch ${{ steps.generate_version.outputs.new_version }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+      id: create_release
+    
+    - name: Upload tar.gz archive
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.archive_name }}.tar.gz
+        asset_name: ${{ env.archive_name }}.tar.gz
+        asset_content_type: application/gzip
+    
+    - name: Upload zip archive
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./${{ env.archive_name }}.zip
+        asset_name: ${{ env.archive_name }}.zip
+        asset_content_type: application/zip
+    
+    - name: Summary
+      if: steps.check_changes.outputs.changes_detected == 'true'
+      run: |
+        echo "✅ Release ${{ steps.generate_version.outputs.new_version }} created successfully!"
+        echo "📦 Archives: ${{ env.archive_name }}.tar.gz and ${{ env.archive_name }}.zip"
+        echo "🔗 Release URL: ${{ steps.create_release.outputs.html_url }}"
+    
+    - name: No changes detected
+      if: steps.check_changes.outputs.changes_detected == 'false'
+      run: |
+        echo "ℹ️ No changes detected in core files since last release. Skipping release creation."
