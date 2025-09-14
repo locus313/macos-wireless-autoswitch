@@ -135,25 +135,25 @@ jobs:
         cp LICENSE "$ARCHIVE_NAME/"
         
         # Create installation instructions
-        cat > "$ARCHIVE_NAME/INSTALL.txt" << 'EOF'
-macOS Wireless Auto-Switch Installation Instructions
-==================================================
-
-1. Open Terminal and navigate to this directory
-2. Make the install script executable:
-   chmod +x install.sh
-3. Run the installer:
-   ./install.sh i
-4. The utility will now automatically toggle WiFi when wired connections are detected
-
-Uninstallation:
-   ./install.sh ui
-
-Update:
-   ./install.sh up
-
-For more information, see README.md
-EOF
+        {
+          echo "macOS Wireless Auto-Switch Installation Instructions"
+          echo "=================================================="
+          echo ""
+          echo "1. Open Terminal and navigate to this directory"
+          echo "2. Make the install script executable:"
+          echo "   chmod +x install.sh"
+          echo "3. Run the installer:"
+          echo "   ./install.sh i"
+          echo "4. The utility will now automatically toggle WiFi when wired connections are detected"
+          echo ""
+          echo "Uninstallation:"
+          echo "   ./install.sh ui"
+          echo ""
+          echo "Update:"
+          echo "   ./install.sh up"
+          echo ""
+          echo "For more information, see README.md"
+        } > "$ARCHIVE_NAME/INSTALL.txt"
         
         # Create tar.gz archive
         tar -czf "$ARCHIVE_NAME.tar.gz" "$ARCHIVE_NAME"
