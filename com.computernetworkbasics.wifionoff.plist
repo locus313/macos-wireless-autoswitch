@@ -1,15 +1,33 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-<key>Label</key>
-<string>com.computernetworkbasics.wifionoff</string>
-<key>ProgramArguments</key>
-<array>
-<string>/Library/Scripts/NetBasics/wireless.sh</string>
-</array>
-<key>WatchPaths</key>
-<array>
-<string>/Library/Preferences/SystemConfiguration</string>
-</array>
+    <key>Label</key>
+    <string>com.computernetworkbasics.wifionoff</string>
+    
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Library/Scripts/NetBasics/wireless.sh</string>
+    </array>
+    
+    <key>WatchPaths</key>
+    <array>
+        <string>/Library/Preferences/SystemConfiguration</string>
+    </array>
+    
+    <key>UserName</key>
+    <string>root</string>
+    
+    <key>StandardOutPath</key>
+    <string>/var/log/wireless-autoswitch.log</string>
+    <key>StandardErrorPath</key>
+    <string>/var/log/wireless-autoswitch.log</string>
+    
+    <key>RunAtLoad</key>
+    <false/>
+    <key>KeepAlive</key>
+    <false/>
+    
+    <key>ThrottleInterval</key>
+    <integer>5</integer>
 </dict>
 </plist>
