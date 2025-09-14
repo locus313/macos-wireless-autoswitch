@@ -19,8 +19,8 @@ do
   fi
 done
  
-# For Monterey (#21), Ventura (#22), Sonoma (#23)
-if [ "$OSVERSION" == "21" ] || [ "$OSVERSION" == "22" ] || [ "$OSVERSION" == "23" ]; then
+# For Ventura (#22), Sonoma (#23), Sequoia (#24)
+if [ "$OSVERSION" == "22" ] || [ "$OSVERSION" == "23" ] || [ "$OSVERSION" == "24" ]; then
   if [ $IPFOUND ]; then
     /usr/sbin/networksetup -setairportpower "$WIFIINTERFACES" off || exit 1
     echo "Turning OFF wireless on card $WIFIINTERFACES."
