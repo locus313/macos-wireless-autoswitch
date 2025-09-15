@@ -50,7 +50,10 @@ get_wired_interfaces() {
         grep "Hardware Port" | \
         grep -E "${SUPPORTED_ADAPTERS}" | \
         awk -F ": " '{print $3}' | \
-        sed 's/)//g'
+        sed 's/)//g' | \
+        grep -v "bridge" | \
+        tr '\n' ' ' | \
+        sed 's/[[:space:]]*$//'
 }
 
 #
@@ -78,11 +81,14 @@ get_interface_ip() {
     fi
     
     # Get IP address, excluding loopback and self-assigned addresses
-    ifconfig "$interface" 2>/dev/null | \
+    local ip_result
+    ip_result=$(ifconfig "$interface" 2>/dev/null | \
         grep -E 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | \
         grep -E -v '127\.0\.0\.1|169\.254\.' | \
         awk '{print $2}' | \
-        head -1
+        head -1 2>/dev/null)
+    
+    echo "$ip_result"
 }
 
 #
@@ -92,12 +98,17 @@ get_interface_ip() {
 detect_wired_connection() {
     IPFOUND=""
     
+    log_message "Starting wired connection detection..."
+    
     if [[ -z "$INTERFACES" ]]; then
         log_message "No wired interfaces detected"
         return 0
     fi
     
+    log_message "Checking interfaces: $INTERFACES"
+    
     for interface in $INTERFACES; do
+        log_message "Checking interface: $interface"
         local ip_address
         ip_address=$(get_interface_ip "$interface")
         
@@ -105,6 +116,8 @@ detect_wired_connection() {
             IPFOUND="true"
             log_message "Active wired connection detected on interface $interface with IP $ip_address"
             break
+        else
+            log_message "No IP found on interface $interface"
         fi
     done
     
