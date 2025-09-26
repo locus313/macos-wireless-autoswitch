@@ -3,9 +3,9 @@
 #
 # macOS Wireless Auto-Switch Utility
 # Automatically toggles WiFi off when wired Ethernet connection is detected
-# and back on when disconnected. Supports Ventura, Sonoma, and Sequoia.
+# and back on when disconnected. Supports Sonoma, Sequoia, and Tahoe.
 #
-# Requirements: Root privileges, macOS 13+, Bash 4+
+# Requirements: Root privileges, macOS 14+, Bash 4+
 # Usage: Executed automatically by LaunchDaemon on network configuration changes
 #
 
@@ -14,7 +14,7 @@ set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 # Constants
 readonly SCRIPT_NAME="wireless.sh"
 readonly SUPPORTED_ADAPTERS="Ethernet|LAN|Thunderbolt|AX88179A"
-readonly SUPPORTED_OS_VERSIONS="22|23|24"  # Ventura, Sonoma, Sequoia
+readonly SUPPORTED_OS_VERSIONS="23|24|25"  # Sonoma, Sequoia, Tahoe
 readonly LOOP_PREVENTION_DELAY=10
 
 # Global variables
@@ -35,7 +35,7 @@ log_message() {
 
 #
 # Get the current macOS version number
-# Returns: OS version number (22, 23, 24, etc.)
+# Returns: OS version number (23, 24, 25, etc.)
 #
 get_os_version() {
     uname -a | awk '{print $3}' | awk 'BEGIN {FS = "."} ; {print $1}'
@@ -164,7 +164,7 @@ main() {
     
     # Validate OS compatibility
     if [[ ! "$OSVERSION" =~ ^($SUPPORTED_OS_VERSIONS)$ ]]; then
-        log_message "WARNING: Unsupported macOS version $OSVERSION. Supported versions: Ventura (22), Sonoma (23), Sequoia (24)"
+        log_message "WARNING: Unsupported macOS version $OSVERSION. Supported versions: Sonoma (23), Sequoia (24), Tahoe (25)"
         exit 1
     fi
     

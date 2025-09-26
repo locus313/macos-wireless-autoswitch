@@ -114,9 +114,9 @@ jobs:
         echo "3. Run \`./install.sh i\` to install" >> release_notes.md
         echo "" >> release_notes.md
         echo "### Compatibility" >> release_notes.md
-        echo "- macOS Ventura (13.x)" >> release_notes.md
         echo "- macOS Sonoma (14.x)" >> release_notes.md
         echo "- macOS Sequoia (15.x)" >> release_notes.md
+        echo "- macOS Tahoe (16.x)" >> release_notes.md
     
     - name: Create release archive
       if: steps.check_changes.outputs.changes_detected == 'true'

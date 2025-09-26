@@ -1,6 +1,6 @@
 # macOS Wireless Auto-Switch
 
-[![macOS](https://img.shields.io/badge/macOS-Ventura%20|%20Sonoma%20|%20Sequoia-blue?style=flat-square)](https://www.apple.com/macos/)
+[![macOS](https://img.shields.io/badge/macOS-Sonoma%20|%20Sequoia%20|%20Tahoe-blue?style=flat-square)](https://www.apple.com/macos/)
 [![Bash](https://img.shields.io/badge/Bash-4+-green?style=flat-square)](https://www.gnu.org/software/bash/)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
 
@@ -17,13 +17,13 @@ A lightweight macOS utility that automatically toggles WiFi off when a wired Eth
 - **Multi-adapter Support** - Works with Ethernet, Thunderbolt, LAN, and USB-C adapters (including AX88179A)
 - **System Integration** - Runs as a native macOS system service with proper logging
 - **Smart IP Detection** - Ignores loopback and self-assigned addresses for accurate connection status
-- **Modern macOS Support** - Compatible with Ventura (13.x), Sonoma (14.x), and Sequoia (15.x)
+- **Modern macOS Support** - Compatible with Sonoma (14.x), Sequoia (15.x), and Tahoe (16.x)
 
 ## Installation
 
 ### Prerequisites
 
-- macOS Ventura (13.x) or later
+- macOS Sonoma (14.x) or later
 - Administrator privileges for system installation
 - Bash 4+ (included with modern macOS)
 
@@ -155,7 +155,7 @@ networksetup -listnetworkserviceorder | grep "Hardware Port" | grep "Ethernet\|L
 
 ### System Requirements
 
-- **macOS Version**: Ventura (13.x), Sonoma (14.x), or Sequoia (15.x)
+- **macOS Version**: Sonoma (14.x), Sequoia (15.x), or Tahoe (16.x)
 - **Shell**: Bash 4+ (included with macOS)
 - **Privileges**: Administrator access for installation
 - **Network Stack**: Standard macOS networking components
