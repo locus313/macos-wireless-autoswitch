@@ -292,7 +292,7 @@ Examples:
 
 Requirements:
   - Administrator privileges (sudo access)
-  - macOS Ventura (13.x), Sonoma (14.x), or Sequoia (15.x)
+  - macOS Sonoma (14.x), Sequoia (15.x), or Tahoe (16.x)
   - Source files: $WIRELESS_SCRIPT, $DAEMON_PLIST
 
 For more information, see the project documentation.

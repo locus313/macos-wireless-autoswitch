@@ -16,7 +16,7 @@ This is a simple macOS utility that automatically toggles WiFi off when a wired 
 - Detects ethernet interfaces using `networksetup -listnetworkserviceorder` with hardware port filtering
 - Looks for "Ethernet", "LAN", "Thunderbolt", or "AX88179A" adapter types
 - Uses `ifconfig` + `grep` to find valid IP addresses (excludes 127.0.0.1 and 169.254.x.x)
-- OS version detection via `uname -a` determines compatibility (supports Ventura #22, Sonoma #23, Sequoia #24)
+- OS version detection via `uname -a` determines compatibility (supports Sonoma #23, Sequoia #24, Tahoe #25)
 
 #### Installation Structure
 - Scripts install to `/Library/Scripts/NetBasics/`
