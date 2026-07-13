@@ -1,0 +1,62 @@
+name: Bug Report
+description: Something isn't working correctly
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. Please fill out the fields below.
+
+  - type: dropdown
+    id: macos-version
+    attributes:
+      label: macOS Version
+      options:
+        - Sonoma (14.x)
+        - Sequoia (15.x)
+        - Tahoe (16.x)
+        - Other
+    validations:
+      required: true
+
+  - type: input
+    id: adapter-type
+    attributes:
+      label: Adapter Type
+      description: What wired adapter are you using? (e.g. Thunderbolt Ethernet, USB-C Ethernet, AX88179A)
+      placeholder: e.g. Thunderbolt Ethernet Adapter
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the bug and what you expected to happen.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      value: |
+        1. 
+        2. 
+        3. 
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs
+      description: |
+        Run `log show --predicate 'process == "logger"' --last 10m | grep wireless` and paste the output.
+      render: shell
+
+  - type: textarea
+    id: interfaces
+    attributes:
+      label: Interface Detection Output
+      description: |
+        Run `networksetup -listnetworkserviceorder` and paste the output.
+      render: shell
