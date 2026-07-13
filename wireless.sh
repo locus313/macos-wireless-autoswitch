@@ -143,13 +143,16 @@ toggle_wifi() {
         exit 1
     fi
     
-    # Execute WiFi toggle command
-    if ! /usr/sbin/networksetup -setairportpower "$WIFIINTERFACES" "$desired_state"; then
-        log_message "ERROR: Failed to set WiFi power to $desired_state on interface $WIFIINTERFACES"
-        exit 1
-    fi
-    
-    log_message "Successfully turned $desired_state WiFi on interface $WIFIINTERFACES"
+    # Iterate over each WiFi interface (handles multi-adapter Macs)
+    local iface
+    while IFS= read -r iface; do
+        [[ -z "$iface" ]] && continue
+        if ! /usr/sbin/networksetup -setairportpower "$iface" "$desired_state"; then
+            log_message "ERROR: Failed to set WiFi power to $desired_state on interface $iface"
+            exit 1
+        fi
+        log_message "Successfully turned $desired_state WiFi on interface $iface"
+    done <<< "$WIFIINTERFACES"
 }
 
 #
@@ -168,9 +171,9 @@ main() {
         exit 1
     fi
     
-    # Get network interfaces
-    INTERFACES=$(get_wired_interfaces)
-    WIFIINTERFACES=$(get_wifi_interfaces)
+    # Get network interfaces (|| "" guards against set -e killing the script when grep finds no matches)
+    INTERFACES=$(get_wired_interfaces) || INTERFACES=""
+    WIFIINTERFACES=$(get_wifi_interfaces) || WIFIINTERFACES=""
     
     log_message "Detected wired interfaces: ${INTERFACES:-none}"
     log_message "Detected WiFi interfaces: ${WIFIINTERFACES:-none}"

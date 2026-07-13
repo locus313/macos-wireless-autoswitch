@@ -176,11 +176,14 @@ install_components() {
     fi
     log_message "Copied: $DAEMON_PLIST -> $daemon_dest"
     
-    # Set plist ownership
+    # Set plist ownership and permissions (644 required for launchctl to load)
     if ! $SUDO chown root:wheel "$daemon_dest"; then
         log_error_and_exit "Failed to set ownership on $daemon_dest"
     fi
-    log_message "Set ownership (root:wheel) on: $daemon_dest"
+    if ! $SUDO chmod 644 "$daemon_dest"; then
+        log_error_and_exit "Failed to set permissions on $daemon_dest"
+    fi
+    log_message "Set ownership (root:wheel) and permissions (644) on: $daemon_dest"
     
     start_daemon
     log_message "Installation completed successfully"
@@ -258,9 +261,12 @@ update_components() {
     fi
     log_message "Updated: $daemon_dest"
     
-    # Set plist ownership
+    # Set plist ownership and permissions (644 required for launchctl to load)
     if ! $SUDO chown root:wheel "$daemon_dest"; then
         log_error_and_exit "Failed to set ownership on $daemon_dest"
+    fi
+    if ! $SUDO chmod 644 "$daemon_dest"; then
+        log_error_and_exit "Failed to set permissions on $daemon_dest"
     fi
     
     start_daemon

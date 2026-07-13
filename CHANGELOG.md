@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `wireless.sh`: `set -e` + empty grep silently killed the script before WiFi could be re-enabled; bare assignments now use `|| INTERFACES=""` / `|| WIFIINTERFACES=""` guards (fixes #27)
+- `wireless.sh`: `toggle_wifi` passed multi-line `$WIFIINTERFACES` as one argument, failing on Macs with multiple WiFi adapters; now iterates per interface (fixes #28)
+- `install.sh`: missing `chmod 644` on installed plist caused `launchctl` to silently refuse loading on systems with a restrictive umask; added to both `install_components` and `update_components` (fixes #26)
+
 ## [1.0.6] – 2025
 
 ### Added
