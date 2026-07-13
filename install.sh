@@ -345,6 +345,10 @@ process_command() {
 # Main execution function
 #
 main() {
+    # Resolve paths relative to the script's own directory so install.sh works
+    # when invoked from any working directory (e.g. sudo /path/to/install.sh i)
+    cd "$(dirname "${BASH_SOURCE[0]}")"
+
     # Process command line arguments if provided
     if [[ $# -gt 0 ]]; then
         process_command "$1"
