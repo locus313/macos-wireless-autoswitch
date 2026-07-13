@@ -143,16 +143,18 @@ toggle_wifi() {
         exit 1
     fi
     
-    # Iterate over each WiFi interface (handles multi-adapter Macs)
-    local iface
+    # Iterate all adapters; accumulate failures so no interface is left in a split state
+    local iface failed=0
     while IFS= read -r iface; do
         [[ -z "$iface" ]] && continue
         if ! /usr/sbin/networksetup -setairportpower "$iface" "$desired_state"; then
             log_message "ERROR: Failed to set WiFi power to $desired_state on interface $iface"
-            exit 1
+            failed=1
+        else
+            log_message "Successfully turned $desired_state WiFi on interface $iface"
         fi
-        log_message "Successfully turned $desired_state WiFi on interface $iface"
     done <<< "$WIFIINTERFACES"
+    [[ $failed -eq 0 ]] || exit 1
 }
 
 #
