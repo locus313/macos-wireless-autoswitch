@@ -28,7 +28,7 @@ macos-wireless-autoswitch/
     ├── PULL_REQUEST_TEMPLATE.md
     ├── agents/                              # Copilot custom agents
     ├── instructions/                        # Copilot instruction files
-    └── skills/                              # Copilot skills (16 installed)
+    └── skills/                              # Copilot skills (17 installed; includes sync-docs)
 ```
 
 ---
@@ -149,7 +149,7 @@ When a new macOS version ships:
 2. Update README badges: `macOS-Sonoma%20|%20Sequoia%20|%20Tahoe` string
 3. Update `release.yml` compatibility notes in the release notes template (lines ~117–119)
 4. Update `validate.yml` macOS version check comment
-5. Update `.github/copilot-instructions.md` OS version table
+5. Update `.github/copilot-instructions.md` Compatibility Notes line (mentions supported OS versions inline)
 
 ---
 
@@ -159,5 +159,5 @@ When a new macOS version ships:
 - **Self-assigned IPs** — `169.254.x.x` means no DHCP lease; the IP filter in `get_interface_ip()` must exclude these
 - **Root requirement** — `networksetup -setairportpower` requires root; scripts must run via LaunchDaemon as root, not as user
 - **LaunchDaemon restart loop** — the 10-second sleep at end of `wireless.sh` is intentional; do not remove it
-- **Multiple WiFi interfaces** — `get_wifi_interfaces()` returns the first match; multi-interface Macs are edge cases not currently handled
+- **Multiple WiFi interfaces** — `toggle_wifi()` iterates all interfaces returned by `get_wifi_interfaces()` via a `while IFS= read` loop; failures are accumulated so no interface is left in a split state
 - **`actions/create-release@v1` deprecation** — `release.yml` uses this deprecated action; migrate to `gh release create` when updating

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `.github/skills/sync-docs`: new Copilot skill that audits `AGENTS.md` and `.github/copilot-instructions.md` against the live source, patches stale values, updates `CHANGELOG.md [Unreleased]`, then commits and pushes
+
 ### Fixed
 - `wireless.sh`: `toggle_wifi` mid-loop `exit 1` left multi-adapter Macs in a split WiFi state; loop now completes all interfaces before exiting non-zero (fixes #32)
 - `com.computernetworkbasics.wifionoff.plist`: `RunAtLoad: false` meant booting with Ethernet already connected never triggered the daemon; changed to `true` (fixes #31)
