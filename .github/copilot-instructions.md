@@ -56,3 +56,18 @@ networksetup -listallhardwareports | tr '\n' ' ' | sed -e 's/Hardware Port:/\'$'
 - OS version checks ensure compatibility with recent macOS releases
 
 When modifying this codebase, always test network detection logic thoroughly and ensure LaunchDaemon integration works correctly with system network events.
+
+## Maintenance Matrix
+
+When you change a file, also update these:
+
+| Changed file | Also update |
+|---|---|
+| `wireless.sh` — `SUPPORTED_ADAPTERS` | `README.md` adapter list, `validate.yml` adapter grep |
+| `wireless.sh` — `SUPPORTED_OS_VERSIONS` | `README.md` badges + System Requirements, `release.yml` compatibility notes (lines ~117–119), `validate.yml` version check comment, `AGENTS.md` supported macOS table |
+| `wireless.sh` — `LOOP_PREVENTION_DELAY` | `com.computernetworkbasics.wifionoff.plist` `ThrottleInterval` (should match or exceed) |
+| `wireless.sh` — any function signature | `AGENTS.md` network detection flow diagram |
+| `install.sh` — install paths | `com.computernetworkbasics.wifionoff.plist` `ProgramArguments`, `validate.yml` path checks, `AGENTS.md` install locations |
+| `com.computernetworkbasics.wifionoff.plist` | `validate.yml` plist key checks, `AGENTS.md` LaunchDaemon behavior notes |
+| Any core file (`wireless.sh`, `install.sh`, `*.plist`) | `CHANGELOG.md` under `[Unreleased]` |
+| `.github/workflows/release.yml` — compatibility notes | Keep in sync with `SUPPORTED_OS_VERSIONS` in `wireless.sh` |

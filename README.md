@@ -165,6 +165,15 @@ networksetup -listnetworkserviceorder | grep "Hardware Port" | grep "Ethernet\|L
 - **Ryan Lininger** - Original script concept and implementation
 - **locus313** - Modern macOS compatibility, architecture improvements, and maintenance
 
+## Contributing
+
+1. Fork the repository and create a branch from `main`
+2. Make your changes — see `AGENTS.md` for architecture details and the maintenance matrix
+3. Run `shellcheck wireless.sh install.sh` and fix any errors
+4. Open a pull request with a description of what changed and how to test it
+
+Please update `CHANGELOG.md` under `[Unreleased]` for any user-facing change.
+
 ## Resources
 
 - [macOS LaunchDaemon Documentation](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
