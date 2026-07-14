@@ -109,7 +109,7 @@ stop_daemon() {
     
     if [[ -f "$daemon_path" ]]; then
         log_message "Stopping LaunchDaemon..."
-        if $SUDO launchctl unload "$daemon_path" 2>/dev/null; then
+        if $SUDO launchctl bootout system "$daemon_path" 2>/dev/null; then
             log_message "LaunchDaemon stopped successfully"
         else
             log_message "LaunchDaemon was not running or failed to stop (this is normal)"
@@ -125,7 +125,7 @@ start_daemon() {
     
     if [[ -f "$daemon_path" ]]; then
         log_message "Starting LaunchDaemon..."
-        if $SUDO launchctl load "$daemon_path"; then
+        if $SUDO launchctl bootstrap system "$daemon_path"; then
             log_message "LaunchDaemon started successfully"
         else
             log_error_and_exit "Failed to start LaunchDaemon"
@@ -251,7 +251,7 @@ Examples:
 
 Requirements:
   - Administrator privileges (sudo access)
-  - macOS Sonoma (14.x), Sequoia (15.x), or Tahoe (16.x)
+  - macOS 14+
   - Source files: $WIRELESS_SCRIPT, $DAEMON_PLIST
 
 For more information, see the project documentation.

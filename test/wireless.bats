@@ -64,7 +64,9 @@ inet 10.0.0.1 netmask 0xffffff00"
     export NETWORKSETUP_SERVICEORDER="(Hardware Port: Thunderbolt Ethernet Slot 1, Device: en1)
 (Hardware Port: Ethernet, Device: en0)"
     run get_wired_interfaces
-    [ "$output" = "en1 en0" ]
+    [ "${#lines[@]}" -eq 2 ]
+    [ "${lines[0]}" = "en1" ]
+    [ "${lines[1]}" = "en0" ]
 }
 
 @test "get_wired_interfaces: returns AX88179A USB adapter" {
@@ -152,7 +154,8 @@ Ethernet Address: ff:ee:dd:cc:bb:aa"
 }
 
 @test "detect_wired_connection: returns 0 when second interface has IP (first has none)" {
-    export INTERFACES="en0 en1"
+    export INTERFACES="en0
+en1"
     export IFCONFIG_EN0_OUTPUT=""
     export IFCONFIG_EN1_OUTPUT="inet 10.0.0.5 netmask 0xffffff00"
     run detect_wired_connection

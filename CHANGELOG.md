@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- `wireless.sh`: stale "Sonoma, Sequoia, Tahoe" header comment updated to "macOS 14+" (fixes #56)
+- `install.sh`: `show_help` requirements updated to "macOS 14+"; `launchctl load/unload` replaced with `launchctl bootstrap/bootout` (fixes #56, #57)
+- `wireless.sh`: `get_wired_interfaces()` now returns newline-separated output (dropped `tr`/`sed` trim); `detect_wired_connection()` iterates with `while IFS= read -r` to match `toggle_wifi` (fixes #58)
+- `wireless.sh`: removed dead `2>/dev/null` from `head -1` in `get_interface_ip()` (fixes #62)
+- `com.computernetworkbasics.wifionoff.plist`: `ThrottleInterval` bumped from 5 to 10 to match `LOOP_PREVENTION_DELAY` (fixes #61)
+- `release.yml`: added `CHANGELOG.md` to release archive (fixes #59)
+- `validate.yml`: standardised `actions/checkout` to `@v7` to match `release.yml` (fixes #60)
+
+### Fixed
 - `release.yml`: CHANGELOG.md was never updated on release; workflow now promotes `[Unreleased]` to a versioned entry, updates the comparison link, and commits before tagging (fixes #54)
 
 ### Changed

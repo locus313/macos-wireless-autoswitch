@@ -3,7 +3,7 @@
 #
 # macOS Wireless Auto-Switch Utility
 # Automatically toggles WiFi off when wired Ethernet connection is detected
-# and back on when disconnected. Supports Sonoma, Sequoia, and Tahoe.
+# and back on when disconnected. Supports macOS 14+.
 #
 # Requirements: Root privileges, macOS 14+, Bash 4+
 # Usage: Executed automatically by LaunchDaemon on network configuration changes
@@ -41,9 +41,7 @@ get_wired_interfaces() {
         grep -E "${SUPPORTED_ADAPTERS}" | \
         awk -F ": " '{print $3}' | \
         sed 's/)//g' | \
-        grep -v "bridge" | \
-        tr '\n' ' ' | \
-        sed 's/[[:space:]]*$//'
+        grep -v "bridge"
 }
 
 #
@@ -72,8 +70,7 @@ get_interface_ip() {
         grep -E 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | \
         grep -E -v '127\.0\.0\.1|169\.254\.' | \
         awk '{print $2}' | \
-        head -1 2>/dev/null)
-    
+        head -1)
     echo "$ip_result"
 }
 
@@ -91,7 +88,8 @@ detect_wired_connection() {
 
     log_message "Checking interfaces: $INTERFACES"
 
-    for interface in $INTERFACES; do
+    while IFS= read -r interface; do
+        [[ -z "$interface" ]] && continue
         log_message "Checking interface: $interface"
         local ip_address
         ip_address=$(get_interface_ip "$interface")
@@ -101,7 +99,7 @@ detect_wired_connection() {
             return 0
         fi
         log_message "No IP found on interface $interface"
-    done
+    done <<< "$INTERFACES"
 
     log_message "No active wired connections detected"
     return 1
