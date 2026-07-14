@@ -65,9 +65,11 @@ When you change a file, also update these:
 |---|---|
 | `wireless.sh` — `SUPPORTED_ADAPTERS` | `README.md` adapter list, `validate.yml` adapter grep |
 | `wireless.sh` — `SUPPORTED_OS_VERSIONS` | `README.md` badges + System Requirements, `release.yml` compatibility notes (lines ~117–119), `validate.yml` version check comment, `AGENTS.md` supported macOS table |
-| `wireless.sh` — `LOOP_PREVENTION_DELAY` | `com.computernetworkbasics.wifionoff.plist` `ThrottleInterval` (should match or exceed) |
+| `wireless.sh` — `LOOP_PREVENTION_DELAY` | `com.computernetworkbasics.wifionoff.plist` `ThrottleInterval` (should match or exceed) — `scripts/check_drift.sh` enforces this in CI |
 | `wireless.sh` — any function signature | `AGENTS.md` network detection flow diagram |
-| `install.sh` — install paths | `com.computernetworkbasics.wifionoff.plist` `ProgramArguments`, `validate.yml` path checks, `AGENTS.md` install locations |
+| `install.sh` — install paths | `com.computernetworkbasics.wifionoff.plist` `ProgramArguments`, `validate.yml` path checks, `AGENTS.md` install locations — `scripts/check_drift.sh` enforces this in CI |
 | `com.computernetworkbasics.wifionoff.plist` | `validate.yml` plist key checks, `AGENTS.md` LaunchDaemon behavior notes |
 | Any core file (`wireless.sh`, `install.sh`, `*.plist`) | `CHANGELOG.md` under `[Unreleased]` |
 | `.github/workflows/release.yml` — compatibility notes | Keep in sync with `SUPPORTED_OS_VERSIONS` in `wireless.sh` |
+
+**Failure memory:** `docs/failures/` records past agent mistakes and the checks that prevent recurrence. Read before modifying network detection or install paths.

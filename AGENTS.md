@@ -18,6 +18,12 @@ macos-wireless-autoswitch/
 ├── LICENSE                                  # MIT
 ├── README.md
 ├── CHANGELOG.md
+├── scripts/
+│   └── check_drift.sh                       # Drift check: validates maintenance-matrix sync rules
+├── docs/
+│   └── failures/                            # Failure memory: recurring agent mistakes and fixes
+│       ├── launchdaemon-restart-loop.md
+│       └── install-path-desync.md
 └── .github/
     ├── copilot-instructions.md
     ├── workflows/
@@ -62,6 +68,9 @@ sudo /Library/Scripts/NetBasics/wireless.sh
 
 # Lint both shell scripts
 shellcheck wireless.sh install.sh
+
+# Run drift checks (no macOS needed)
+bash scripts/check_drift.sh
 ```
 
 **Install locations (post-install):**
@@ -72,12 +81,13 @@ shellcheck wireless.sh install.sh
 
 ## Testing
 
-There is no automated test suite — the scripts interact with macOS system APIs that cannot run in a Linux CI environment. Validation in CI covers:
+The scripts interact with macOS system APIs that cannot run natively on Linux CI. Validation in CI covers:
 
 1. **shellcheck** — lint `wireless.sh` and `install.sh` for common bash errors
 2. **xmllint** — validate plist XML structure
 3. **Content checks** — verify `networksetup` usage and install paths
-4. **BATS** — 51 unit tests for all core functions
+4. **BATS** — 45 unit tests for all core functions (25 in `test/wireless.bats`, 20 in `test/install.bats`)
+5. **Drift checks** — `scripts/check_drift.sh` verifies maintenance-matrix sync rules
 
 **Manual testing steps:**
 ```bash

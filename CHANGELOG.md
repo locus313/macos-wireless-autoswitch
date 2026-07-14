@@ -8,6 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- `scripts/check_drift.sh`: drift check script enforcing two maintenance-matrix rules — `LOOP_PREVENTION_DELAY` ≤ `ThrottleInterval`, and `NETBASICS_PATH` present in plist `ProgramArguments`
+- `docs/failures/launchdaemon-restart-loop.md`: failure memory for delay/throttle desync
+- `docs/failures/install-path-desync.md`: failure memory for install path desync between `install.sh` and plist
+- `validate.yml`: added drift check step (`bash scripts/check_drift.sh`) and `scripts/**` path trigger
+
+### Fixed
+- `AGENTS.md`: corrected stale BATS test count (51 → 45); corrected "no automated test suite" contradiction
+
+### Added
 - Migrated release workflow to `googleapis/release-please-action@v4`; releases now go through a PR instead of pushing directly to `main` (fixes protected branch failure)
 
 ### Fixed

@@ -7,12 +7,14 @@ on:
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
       - 'test/**'
+      - 'scripts/**'
   pull_request:
     paths:
       - 'wireless.sh'
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
       - 'test/**'
+      - 'scripts/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -54,3 +56,6 @@ jobs:
 
       - name: Run BATS tests
         run: bats test/
+
+      - name: Run drift checks
+        run: bash scripts/check_drift.sh
