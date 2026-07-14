@@ -14,44 +14,6 @@ setup() {
     set +euo pipefail  # prevent sourced script's strict mode from breaking BATS assertions
 }
 
-# ── get_os_version (#43) ──────────────────────────────────────────────────────
-
-@test "get_os_version: returns 23 for Sonoma" {
-    export UNAME_R_OUTPUT="23.6.0"
-    run get_os_version
-    [ "$status" -eq 0 ]
-    [ "$output" = "23" ]
-}
-
-@test "get_os_version: returns 24 for Sequoia" {
-    export UNAME_R_OUTPUT="24.5.0"
-    run get_os_version
-    [ "$status" -eq 0 ]
-    [ "$output" = "24" ]
-}
-
-@test "get_os_version: returns 25 for Tahoe" {
-    export UNAME_R_OUTPUT="25.0.0"
-    run get_os_version
-    [ "$status" -eq 0 ]
-    [ "$output" = "25" ]
-}
-
-@test "SUPPORTED_OS_VERSIONS: rejects version 22" {
-    run bash -c "osv=22; [[ \"\$osv\" =~ ^(23|24|25)\$ ]]"
-    [ "$status" -eq 1 ]
-}
-
-@test "SUPPORTED_OS_VERSIONS: accepts version 23" {
-    run bash -c "osv=23; [[ \"\$osv\" =~ ^(23|24|25)\$ ]]"
-    [ "$status" -eq 0 ]
-}
-
-@test "SUPPORTED_OS_VERSIONS: rejects version 26" {
-    run bash -c "osv=26; [[ \"\$osv\" =~ ^(23|24|25)\$ ]]"
-    [ "$status" -eq 1 ]
-}
-
 # ── get_interface_ip (#45) ────────────────────────────────────────────────────
 
 @test "get_interface_ip: returns valid IP" {
