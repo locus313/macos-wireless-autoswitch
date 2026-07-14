@@ -5,6 +5,21 @@ All notable changes to macOS Wireless Auto-Switch are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0](https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.10...v1.1.0) (2026-07-14)
+
+
+### Features
+
+* add agent harness — drift checks, failure memory, fix stale docs ([#67](https://github.com/locus313/macos-wireless-autoswitch/issues/67)) ([872b274](https://github.com/locus313/macos-wireless-autoswitch/commit/872b274230dd8af4312d5362d274152109d6f9aa))
+* migrate to release-please for PR-based releases ([#64](https://github.com/locus313/macos-wireless-autoswitch/issues/64)) ([894ed50](https://github.com/locus313/macos-wireless-autoswitch/commit/894ed5062e1b85fb8ba3260aa6dca668d87140ad))
+
+
+### Bug Fixes
+
+* resolve issues [#69](https://github.com/locus313/macos-wireless-autoswitch/issues/69), [#70](https://github.com/locus313/macos-wireless-autoswitch/issues/70), [#71](https://github.com/locus313/macos-wireless-autoswitch/issues/71), [#72](https://github.com/locus313/macos-wireless-autoswitch/issues/72) ([#73](https://github.com/locus313/macos-wireless-autoswitch/issues/73)) ([0073b60](https://github.com/locus313/macos-wireless-autoswitch/commit/0073b6007eec5435ebe5393ab4a77b1438ab391d))
+* seven cleanup issues ([#56](https://github.com/locus313/macos-wireless-autoswitch/issues/56)–[#62](https://github.com/locus313/macos-wireless-autoswitch/issues/62)) ([#63](https://github.com/locus313/macos-wireless-autoswitch/issues/63)) ([50349fd](https://github.com/locus313/macos-wireless-autoswitch/commit/50349fde5ce906f98578c23c0e0ecc29f6b740fc))
+* update CHANGELOG on release and backfill comparison links (fixes [#54](https://github.com/locus313/macos-wireless-autoswitch/issues/54)) ([#55](https://github.com/locus313/macos-wireless-autoswitch/issues/55)) ([ce4cca4](https://github.com/locus313/macos-wireless-autoswitch/commit/ce4cca4379fe101d8abe13510bf047e347daeea8))
+
 ## [Unreleased]
 
 ### Fixed
