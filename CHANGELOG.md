@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+- `wireless.sh`: removed `get_os_version()`, `SUPPORTED_OS_VERSIONS` constant, and the runtime OS version check from `main()` — the check was a killswitch that would block future macOS versions despite `networksetup` still working (fixes #52)
+
+### Changed
+- `test/wireless.bats`: removed 6 now-obsolete OS version tests
+- `validate.yml`: removed `uname -r` and `23|24|25` content checks
+- `AGENTS.md`: updated flow diagram, constants list, and "Adding New macOS Version Support" section
+
 ### Added
 - BATS test suite (`test/wireless.bats`, `test/install.bats`) with 51 tests covering all core functions (fixes #42–#50)
 - `test/helpers/` stubs for `uname`, `ifconfig`, `logger`, `id`, and `networksetup`

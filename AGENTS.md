@@ -76,7 +76,8 @@ There is no automated test suite — the scripts interact with macOS system APIs
 
 1. **shellcheck** — lint `wireless.sh` and `install.sh` for common bash errors
 2. **xmllint** — validate plist XML structure
-3. **Compatibility checks** — verify `SUPPORTED_OS_VERSIONS` constant and `networksetup` usage
+3. **Content checks** — verify `networksetup` usage and install paths
+4. **BATS** — 51 unit tests for all core functions
 
 **Manual testing steps:**
 ```bash
@@ -95,14 +96,13 @@ log show --predicate 'process == "logger"' --last 5m | grep wireless
 ## Key Patterns & Conventions
 
 ### Function Design
-- All functions use `local` variables — no global side-effects except the four module-level globals (`IPFOUND`, `OSVERSION`, `INTERFACES`, `WIFIINTERFACES`) set in `main()`
+- All functions use `local` variables — no global side-effects except the two module-level globals (`INTERFACES`, `WIFIINTERFACES`) set in `main()`
 - Functions return data via `echo`, callers capture with `$(…)`
 - Error paths call `exit 1` — LaunchDaemon treats non-zero exit as restart trigger
 
 ### Network Detection Flow
 ```
 main()
-  ├─ get_os_version()        → validates against SUPPORTED_OS_VERSIONS
   ├─ get_wired_interfaces()  → filters by SUPPORTED_ADAPTERS, excludes "bridge"
   ├─ get_wifi_interfaces()   → greps for "Wi-Fi" in hardware ports
   ├─ detect_wired_connection()
@@ -113,7 +113,6 @@ main()
 
 ### Constants (top of `wireless.sh`)
 - `SUPPORTED_ADAPTERS` — pipe-delimited regex: `"Ethernet|LAN|Thunderbolt|AX88179A"`
-- `SUPPORTED_OS_VERSIONS` — pipe-delimited kernel majors: `"23|24|25"`
 - `LOOP_PREVENTION_DELAY` — seconds to sleep at end (prevents LaunchDaemon restart loop): `10`
 
 ### LaunchDaemon Behavior
@@ -143,13 +142,7 @@ When a new USB/Thunderbolt adapter type needs to be supported:
 
 ## Adding New macOS Version Support
 
-When a new macOS version ships:
-
-1. Update `SUPPORTED_OS_VERSIONS` in `wireless.sh` with new kernel major (e.g., `26` for next release)
-2. Update README badges: `macOS-Sonoma%20|%20Sequoia%20|%20Tahoe` string
-3. Update `release.yml` compatibility notes in the release notes template (lines ~117–119)
-4. Update `validate.yml` macOS version check comment
-5. Update `.github/copilot-instructions.md` Compatibility Notes line (mentions supported OS versions inline)
+No code change required — the OS version check was removed. The script works on any macOS with `networksetup`. Update only documentation (README badge, CHANGELOG) when confirming compatibility with a new release.
 
 ---
 

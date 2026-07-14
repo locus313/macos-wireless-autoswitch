@@ -15,7 +15,6 @@ set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 SCRIPT_NAME="$(basename "$0")"
 readonly SCRIPT_NAME
 readonly SUPPORTED_ADAPTERS="Ethernet|LAN|Thunderbolt|AX88179A"
-readonly SUPPORTED_OS_VERSIONS="23|24|25"  # Sonoma, Sequoia, Tahoe
 readonly LOOP_PREVENTION_DELAY=10
 
 # Global variables
@@ -30,14 +29,6 @@ log_message() {
     local message="$1"
     logger "${SCRIPT_NAME}: ${message}"
     echo "${SCRIPT_NAME}: ${message}"
-}
-
-#
-# Get the current macOS version number
-# Returns: OS version number (23, 24, 25, etc.)
-#
-get_os_version() {
-    uname -r | cut -d. -f1
 }
 
 #
@@ -152,18 +143,7 @@ toggle_wifi() {
 #
 main() {
     log_message "Starting network detection and WiFi management"
-    
-    # Get system information
-    local OSVERSION
-    OSVERSION=$(get_os_version)
-    log_message "Detected macOS version: $OSVERSION"
-    
-    # Validate OS compatibility
-    if [[ ! "$OSVERSION" =~ ^($SUPPORTED_OS_VERSIONS)$ ]]; then
-        log_message "WARNING: Unsupported macOS version $OSVERSION. Supported versions: Sonoma (23), Sequoia (24), Tahoe (25)"
-        exit 1
-    fi
-    
+
     # Get network interfaces (|| "" guards against set -e killing the script when grep finds no matches)
     INTERFACES=$(get_wired_interfaces) || INTERFACES=""
     WIFIINTERFACES=$(get_wifi_interfaces) || WIFIINTERFACES=""
