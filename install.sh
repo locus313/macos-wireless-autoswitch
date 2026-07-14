@@ -15,7 +15,8 @@
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
 # Constants
-readonly SCRIPT_NAME="$(basename "$0")"
+SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_NAME
 readonly NETBASICS_PATH="/Library/Scripts/NetBasics"
 readonly LAUNCHDAEMONS_PATH="/Library/LaunchDaemons"
 readonly DAEMON_NAME="com.computernetworkbasics.wifionoff"

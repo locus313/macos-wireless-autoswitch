@@ -12,7 +12,8 @@
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
 # Constants
-readonly SCRIPT_NAME="$(basename "$0")"
+SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_NAME
 readonly SUPPORTED_ADAPTERS="Ethernet|LAN|Thunderbolt|AX88179A"
 readonly SUPPORTED_OS_VERSIONS="23|24|25"  # Sonoma, Sequoia, Tahoe
 readonly LOOP_PREVENTION_DELAY=10
