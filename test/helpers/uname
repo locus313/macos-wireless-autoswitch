@@ -1,0 +1,3 @@
+#!/bin/bash
+# Stub for uname; returns UNAME_R_OUTPUT for -r flag used in get_os_version
+echo "${UNAME_R_OUTPUT:-23.6.0}"

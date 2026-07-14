@@ -1,0 +1,3 @@
+#!/bin/bash
+# Stub for logger; swallows all output so tests stay quiet
+true

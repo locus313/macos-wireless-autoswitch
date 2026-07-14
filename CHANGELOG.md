@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- BATS test suite (`test/wireless.bats`, `test/install.bats`) with 51 tests covering all core functions (fixes #42–#50)
+- `test/helpers/` stubs for `uname`, `ifconfig`, `logger`, `id`, and `networksetup`
+- CI: `validate.yml` now installs bats, deploys the `networksetup` stub to `/usr/sbin/`, and runs the full test suite; also triggers on `test/**` path changes
+
 ### Changed
 - `wireless.sh`: `SCRIPT_NAME` now uses `$(basename "$0")` instead of a hardcoded string (fixes #39)
 - `wireless.sh`: `get_os_version` simplified from double-awk to `uname -r | cut -d. -f1` (fixes #36)
