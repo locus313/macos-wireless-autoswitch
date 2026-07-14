@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `wireless.sh`: replaced `awk '{print $2}' | head -1` with `awk 'NR==1{print $2; exit}'` in `get_interface_ip()` to prevent SIGPIPE under `pipefail` (#69)
+- `wireless.sh`: replaced fragile `tr`/`sed`/`grep`/`awk` pipeline in `get_wifi_interfaces()` with `awk '/^Hardware Port: Wi-Fi$/{getline; print $2}'` (#72)
+- `install.sh`: `update_components()` now calls `create_directories` before stopping the daemon, preventing failure when directories are missing (#70)
+- `install.sh`: converted `SUDO` string variable to array (`SUDO=()`/`SUDO=(sudo)`) and updated all callsites to `"${SUDO[@]}"` to fix SC2086 and handle spaces safely (#71)
+
 ### Added
 - `scripts/check_drift.sh`: drift check script enforcing two maintenance-matrix rules — `LOOP_PREVENTION_DELAY` ≤ `ThrottleInterval`, and `NETBASICS_PATH` present in plist `ProgramArguments`
 - `docs/failures/launchdaemon-restart-loop.md`: failure memory for delay/throttle desync
