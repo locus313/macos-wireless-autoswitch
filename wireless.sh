@@ -12,14 +12,12 @@
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
 # Constants
-readonly SCRIPT_NAME="wireless.sh"
+readonly SCRIPT_NAME="$(basename "$0")"
 readonly SUPPORTED_ADAPTERS="Ethernet|LAN|Thunderbolt|AX88179A"
 readonly SUPPORTED_OS_VERSIONS="23|24|25"  # Sonoma, Sequoia, Tahoe
 readonly LOOP_PREVENTION_DELAY=10
 
 # Global variables
-IPFOUND=""
-OSVERSION=""
 INTERFACES=""
 WIFIINTERFACES=""
 
@@ -38,7 +36,7 @@ log_message() {
 # Returns: OS version number (23, 24, 25, etc.)
 #
 get_os_version() {
-    uname -a | awk '{print $3}' | awk 'BEGIN {FS = "."} ; {print $1}'
+    uname -r | cut -d. -f1
 }
 
 #
@@ -75,11 +73,7 @@ get_wifi_interfaces() {
 #
 get_interface_ip() {
     local interface="$1"
-    
-    if [[ -z "$interface" ]]; then
-        return 1
-    fi
-    
+
     # Get IP address, excluding loopback and self-assigned addresses
     local ip_result
     ip_result=$(ifconfig "$interface" 2>/dev/null | \
@@ -93,37 +87,32 @@ get_interface_ip() {
 
 #
 # Check if any wired interface has a valid IP address
-# Sets global IPFOUND variable to "true" if found
+# Returns: 0 if wired connection found, 1 otherwise
 #
 detect_wired_connection() {
-    IPFOUND=""
-    
     log_message "Starting wired connection detection..."
-    
+
     if [[ -z "$INTERFACES" ]]; then
         log_message "No wired interfaces detected"
-        return 0
+        return 1
     fi
-    
+
     log_message "Checking interfaces: $INTERFACES"
-    
+
     for interface in $INTERFACES; do
         log_message "Checking interface: $interface"
         local ip_address
         ip_address=$(get_interface_ip "$interface")
-        
+
         if [[ -n "$ip_address" ]]; then
-            IPFOUND="true"
             log_message "Active wired connection detected on interface $interface with IP $ip_address"
-            break
-        else
-            log_message "No IP found on interface $interface"
+            return 0
         fi
+        log_message "No IP found on interface $interface"
     done
-    
-    if [[ -z "$IPFOUND" ]]; then
-        log_message "No active wired connections detected"
-    fi
+
+    log_message "No active wired connections detected"
+    return 1
 }
 
 #
@@ -164,6 +153,7 @@ main() {
     log_message "Starting network detection and WiFi management"
     
     # Get system information
+    local OSVERSION
     OSVERSION=$(get_os_version)
     log_message "Detected macOS version: $OSVERSION"
     
@@ -180,11 +170,8 @@ main() {
     log_message "Detected wired interfaces: ${INTERFACES:-none}"
     log_message "Detected WiFi interfaces: ${WIFIINTERFACES:-none}"
     
-    # Detect wired connection status
-    detect_wired_connection
-    
-    # Manage WiFi state based on wired connection
-    if [[ -n "$IPFOUND" ]]; then
+    # Detect wired connection and manage WiFi state
+    if detect_wired_connection; then
         toggle_wifi "off"
         log_message "WiFi disabled due to active wired connection"
     else
