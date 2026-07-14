@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `release.yml`: CHANGELOG.md was never updated on release; workflow now promotes `[Unreleased]` to a versioned entry, updates the comparison link, and commits before tagging (fixes #54)
+
+### Changed
+- `CHANGELOG.md`: backfilled missing comparison links for v1.0.7–v1.0.10
+
 ### Removed
 - `wireless.sh`: removed `get_os_version()`, `SUPPORTED_OS_VERSIONS` constant, and the runtime OS version check from `main()` — the check was a killswitch that would block future macOS versions despite `networksetup` still working (fixes #52)
 
@@ -89,7 +95,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release: `wireless.sh` core logic, `install.sh`, LaunchDaemon plist
 - Supports Ethernet, Thunderbolt, LAN, and AX88179A (USB-C) adapters
 
-[Unreleased]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.6...HEAD
+[Unreleased]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.10...HEAD
+[1.0.10]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.9...v1.0.10
+[1.0.9]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.8...v1.0.9
+[1.0.8]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.7...v1.0.8
+[1.0.7]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.6...v1.0.7
 [1.0.6]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.5...v1.0.6
 [1.0.5]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.4...v1.0.5
 [1.0.4]: https://github.com/locus313/macos-wireless-autoswitch/compare/v1.0.3...v1.0.4
