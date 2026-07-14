@@ -24,7 +24,7 @@ readonly DAEMON_PLIST="${DAEMON_NAME}.plist"
 readonly WIRELESS_SCRIPT="wireless.sh"
 
 # Global variables
-SUDO=""
+SUDO=()
 
 # Menu options for interactive mode
 readonly PS3='[Please enter your choice]: '
@@ -60,10 +60,10 @@ log_error_and_exit() {
 #
 configure_sudo() {
     if [[ $(id -u) -eq 0 ]]; then
-        SUDO=""
+        SUDO=()
         log_message "Running as root"
     else
-        SUDO="sudo"
+        SUDO=(sudo)
         log_message "Running as non-root user, will use sudo for privileged operations"
     fi
 }
@@ -75,7 +75,7 @@ create_directories() {
     log_message "Creating system directories..."
     
     if [[ ! -d "$NETBASICS_PATH" ]]; then
-        if ! $SUDO mkdir -p "$NETBASICS_PATH"; then
+        if ! "${SUDO[@]}" mkdir -p "$NETBASICS_PATH"; then
             log_error_and_exit "Failed to create directory $NETBASICS_PATH"
         fi
         log_message "Created directory: $NETBASICS_PATH"
@@ -84,7 +84,7 @@ create_directories() {
     fi
     
     if [[ ! -d "$LAUNCHDAEMONS_PATH" ]]; then
-        if ! $SUDO mkdir -p "$LAUNCHDAEMONS_PATH"; then
+        if ! "${SUDO[@]}" mkdir -p "$LAUNCHDAEMONS_PATH"; then
             log_error_and_exit "Failed to create directory $LAUNCHDAEMONS_PATH"
         fi
         log_message "Created directory: $LAUNCHDAEMONS_PATH"
@@ -109,7 +109,7 @@ stop_daemon() {
     
     if [[ -f "$daemon_path" ]]; then
         log_message "Stopping LaunchDaemon..."
-        if $SUDO launchctl bootout system "$daemon_path" 2>/dev/null; then
+        if "${SUDO[@]}" launchctl bootout system "$daemon_path" 2>/dev/null; then
             log_message "LaunchDaemon stopped successfully"
         else
             log_message "LaunchDaemon was not running or failed to stop (this is normal)"
@@ -125,7 +125,7 @@ start_daemon() {
     
     if [[ -f "$daemon_path" ]]; then
         log_message "Starting LaunchDaemon..."
-        if $SUDO launchctl bootstrap system "$daemon_path"; then
+        if "${SUDO[@]}" launchctl bootstrap system "$daemon_path"; then
             log_message "LaunchDaemon started successfully"
         else
             log_error_and_exit "Failed to start LaunchDaemon"
@@ -140,18 +140,18 @@ start_daemon() {
 #
 _deploy_files() {
     local wireless_dest="${NETBASICS_PATH}/${WIRELESS_SCRIPT}"
-    $SUDO cp "$WIRELESS_SCRIPT" "$wireless_dest" \
+    "${SUDO[@]}" cp "$WIRELESS_SCRIPT" "$wireless_dest" \
         || log_error_and_exit "Failed to copy $WIRELESS_SCRIPT to $wireless_dest"
-    $SUDO chmod 755 "$wireless_dest" \
+    "${SUDO[@]}" chmod 755 "$wireless_dest" \
         || log_error_and_exit "Failed to set permissions on $wireless_dest"
     log_message "Deployed: $wireless_dest"
 
     local daemon_dest="${LAUNCHDAEMONS_PATH}/${DAEMON_PLIST}"
-    $SUDO cp "$DAEMON_PLIST" "$daemon_dest" \
+    "${SUDO[@]}" cp "$DAEMON_PLIST" "$daemon_dest" \
         || log_error_and_exit "Failed to copy $DAEMON_PLIST to $daemon_dest"
-    $SUDO chown root:wheel "$daemon_dest" \
+    "${SUDO[@]}" chown root:wheel "$daemon_dest" \
         || log_error_and_exit "Failed to set ownership on $daemon_dest"
-    $SUDO chmod 644 "$daemon_dest" \
+    "${SUDO[@]}" chmod 644 "$daemon_dest" \
         || log_error_and_exit "Failed to set permissions on $daemon_dest"
     log_message "Deployed: $daemon_dest (root:wheel, 644)"
 
@@ -183,7 +183,7 @@ uninstall_components() {
     # Remove wireless script
     local wireless_dest="${NETBASICS_PATH}/${WIRELESS_SCRIPT}"
     if [[ -f "$wireless_dest" ]]; then
-        if ! $SUDO rm -f "$wireless_dest"; then
+        if ! "${SUDO[@]}" rm -f "$wireless_dest"; then
             log_error_and_exit "Failed to remove $wireless_dest"
         fi
         log_message "Removed: $wireless_dest"
@@ -194,7 +194,7 @@ uninstall_components() {
     # Remove LaunchDaemon plist
     local daemon_dest="${LAUNCHDAEMONS_PATH}/${DAEMON_PLIST}"
     if [[ -f "$daemon_dest" ]]; then
-        if ! $SUDO rm -f "$daemon_dest"; then
+        if ! "${SUDO[@]}" rm -f "$daemon_dest"; then
             log_error_and_exit "Failed to remove $daemon_dest"
         fi
         log_message "Removed: $daemon_dest"
@@ -204,7 +204,7 @@ uninstall_components() {
     
     # Remove directory if empty
     if [[ -d "$NETBASICS_PATH" ]] && [[ -z "$(ls -A "$NETBASICS_PATH")" ]]; then
-        if ! $SUDO rmdir "$NETBASICS_PATH"; then
+        if ! "${SUDO[@]}" rmdir "$NETBASICS_PATH"; then
             log_message "Warning: Failed to remove empty directory $NETBASICS_PATH"
         else
             log_message "Removed empty directory: $NETBASICS_PATH"
@@ -221,6 +221,7 @@ update_components() {
     log_message "Starting update..."
     configure_sudo
     validate_source_files
+    create_directories
     stop_daemon
     _deploy_files
     log_message "Update completed successfully"

@@ -50,10 +50,7 @@ get_wired_interfaces() {
 #
 get_wifi_interfaces() {
     /usr/sbin/networksetup -listallhardwareports | \
-        tr '\n' ' ' | \
-        sed -e 's/Hardware Port:/\n/g' | \
-        grep Wi-Fi | \
-        awk '{print $3}'
+        awk '/^Hardware Port: Wi-Fi$/{getline; print $2}'
 }
 
 #
@@ -69,8 +66,7 @@ get_interface_ip() {
     ip_result=$(ifconfig "$interface" 2>/dev/null | \
         grep -E 'inet [0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}' | \
         grep -E -v '127\.0\.0\.1|169\.254\.' | \
-        awk '{print $2}' | \
-        head -1)
+        awk 'NR==1{print $2; exit}')
     echo "$ip_result"
 }
 
