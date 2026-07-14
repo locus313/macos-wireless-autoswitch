@@ -28,6 +28,6 @@
     <false/>
     
     <key>ThrottleInterval</key>
-    <integer>5</integer>
+    <integer>10</integer>
 </dict>
 </plist>

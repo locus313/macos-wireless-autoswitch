@@ -54,7 +54,7 @@ jobs:
         run: |
           NAME="macos-wireless-autoswitch-${{ steps.version.outputs.new }}"
           mkdir "$NAME"
-          cp wireless.sh install.sh com.computernetworkbasics.wifionoff.plist README.md LICENSE "$NAME/"
+          cp wireless.sh install.sh com.computernetworkbasics.wifionoff.plist README.md LICENSE CHANGELOG.md "$NAME/"
           tar -czf "$NAME.tar.gz" "$NAME"
           zip -r "$NAME.zip" "$NAME"
           echo "ARCHIVE=$NAME" >> $GITHUB_ENV

@@ -25,7 +25,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Install xmllint and bats
         run: sudo apt-get install -y --no-install-recommends libxml2-utils bats
