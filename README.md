@@ -1,181 +1,124 @@
 # macOS Wireless Auto-Switch
 
-[![macOS](https://img.shields.io/badge/macOS-Sonoma%20|%20Sequoia%20|%20Tahoe-blue?style=flat-square)](https://www.apple.com/macos/)
-[![Bash](https://img.shields.io/badge/Bash-4+-green?style=flat-square)](https://www.gnu.org/software/bash/)
+[![macOS](https://img.shields.io/badge/macOS-14%2B-blue?style=flat-square)](https://www.apple.com/macos/)
+[![Version](https://img.shields.io/github/v/release/locus313/macos-wireless-autoswitch?style=flat-square)](https://github.com/locus313/macos-wireless-autoswitch/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/locus313/macos-wireless-autoswitch/validate.yml?style=flat-square&label=CI)](https://github.com/locus313/macos-wireless-autoswitch/actions)
 [![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)](LICENSE)
-
-⭐ If you like this project, star it on GitHub — it helps a lot!
 
 [Features](#features) • [Installation](#installation) • [Usage](#usage) • [How it works](#how-it-works) • [Troubleshooting](#troubleshooting)
 
-A lightweight macOS utility that automatically toggles WiFi off when a wired Ethernet connection is detected, and back on when disconnected. Perfect for eliminating network conflicts and ensuring optimal connection performance without manual intervention.
+Automatically turns WiFi off when a wired Ethernet connection is active, and back on when you unplug. No polling, no tray icon — runs as a native macOS LaunchDaemon triggered by real network events.
 
 ## Features
 
-- **Automatic WiFi Management** - Seamlessly switches WiFi off/on based on wired connection status
-- **Real-time Network Monitoring** - Uses macOS LaunchDaemon for instant network state detection
-- **Multi-adapter Support** - Works with Ethernet, Thunderbolt, LAN, and USB-C adapters (including AX88179A)
-- **System Integration** - Runs as a native macOS system service with proper logging
-- **Smart IP Detection** - Ignores loopback and self-assigned addresses for accurate connection status
-- **Modern macOS Support** - Compatible with Sonoma (14.x), Sequoia (15.x), and Tahoe (16.x)
+- **Zero-interaction** — fires on actual network change events, not a timer
+- **Multi-adapter support** — detects built-in Ethernet, Thunderbolt, LAN, and USB-C adapters (AX88179A)
+- **Smart IP validation** — ignores loopback and self-assigned (169.254.x.x) addresses
+- **All WiFi interfaces** — handles Macs with multiple wireless adapters without leaving any in a split state
+- **Structured logging** — output written to `/var/log/wireless-autoswitch.log` and the system log
 
 ## Installation
 
-### Prerequisites
+**Prerequisites:** macOS 14+ and administrator privileges.
 
-- macOS Sonoma (14.x) or later
-- Administrator privileges for system installation
-- Bash 4+ (included with modern macOS)
+```bash
+git clone https://github.com/locus313/macos-wireless-autoswitch.git
+cd macos-wireless-autoswitch
+./install.sh i
+```
 
-### Quick Start
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/locus313/macos-wireless-autoswitch.git
-   cd macos-wireless-autoswitch
-   ```
-
-2. Install the service:
-   ```bash
-   ./install.sh i
-   ```
-
-The installer automatically:
-- Copies scripts to `/Library/Scripts/NetBasics/`
-- Installs the LaunchDaemon configuration
-- Sets proper permissions and ownership
-- Starts monitoring network changes immediately
+The installer copies scripts to `/Library/Scripts/NetBasics/`, installs the LaunchDaemon plist, sets permissions, and starts the service immediately.
 
 > [!NOTE]
-> Installation requires `sudo` privileges to create system-level components.
+> Installation requires `sudo` — you will be prompted if not already root.
 
 ## Usage
 
-### Management Commands
-
-Use the `install.sh` script for all management operations:
+All management is handled through `install.sh`:
 
 ```bash
-# Install the service
-./install.sh i
-
-# Update to latest version  
-./install.sh up
-
-# Uninstall completely
-./install.sh ui
-
-# Interactive menu
-./install.sh
+./install.sh i    # Install
+./install.sh up   # Update to the latest files
+./install.sh ui   # Uninstall
+./install.sh      # Interactive menu
 ```
 
-### Verification
-
-After installation, verify the service is working:
+### Verify the service is running
 
 ```bash
-# Check LaunchDaemon status
+# Check daemon status
 sudo launchctl list | grep com.computernetworkbasics.wifionoff
 
-# View logs
-log show --predicate 'subsystem == "com.apple.console"' --info --last 1h | grep wireless.sh
+# Tail the log
+tail -f /var/log/wireless-autoswitch.log
 ```
 
 ## How it works
 
-The system consists of three components working together:
+```
+Network change event (launchd watches /Library/Preferences/SystemConfiguration)
+  └─> wireless.sh runs as root
+        ├─ Enumerate wired interfaces (Ethernet | LAN | Thunderbolt | AX88179A)
+        ├─ Check each interface for a valid DHCP address
+        │    wired address found → networksetup -setairportpower <iface> off
+        │    no wired address    → networksetup -setairportpower <iface> on
+        └─ Sleep 10 s  (matches ThrottleInterval; prevents restart loop)
+```
 
-### Network Detection Engine (`wireless.sh`)
-- Automatically scans for wired network interfaces using hardware port detection
-- Validates active connections by checking for legitimate IP addresses
-- Controls WiFi state using `networksetup -setairportpower` commands
-- Implements smart filtering to exclude loopback and self-assigned addresses
+The LaunchDaemon (`com.computernetworkbasics.wifionoff.plist`) uses `WatchPaths` rather than `KeepAlive`, so it only runs when the network configuration directory changes — no persistent process, no polling.
 
-### System Monitoring (`com.computernetworkbasics.wifionoff.plist`)
-- LaunchDaemon watches `/Library/Preferences/SystemConfiguration` for network changes
-- Triggers the wireless script whenever network configuration is modified
-- Runs with root privileges for system-level network control
-- Uses throttling to prevent excessive execution during rapid network changes
+### Supported adapters
 
-### Management Interface (`install.sh`)
-- Provides interactive installation, update, and removal capabilities
-- Handles proper permission setting and system integration
-- Includes sudo privilege detection and validation
-- Offers both command-line and menu-driven operation modes
-
-### Supported Network Adapters
-
-The utility automatically detects and works with:
-- Built-in Ethernet ports
-- Thunderbolt Ethernet adapters
-- USB-C Ethernet adapters (including AX88179A chipset)
-- Any interface with "LAN" designation
+| Type | Matched by |
+|---|---|
+| Built-in Ethernet | `Ethernet` |
+| Thunderbolt Ethernet | `Thunderbolt` |
+| USB-C / USB Ethernet | `AX88179A` |
+| Generic wired | `LAN` |
 
 ## Troubleshooting
 
-### Common Issues
+**WiFi isn't switching:**
 
-**WiFi not switching automatically:**
 ```bash
-# Restart the service
-sudo launchctl unload /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
-sudo launchctl load /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
+# Restart the daemon
+sudo launchctl bootout system /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
 ```
 
-**Script not detecting wired connection:**
+**Wired connection not detected:**
+
 ```bash
-# Test detection manually
+# Run the script manually to see full output
 sudo /Library/Scripts/NetBasics/wireless.sh
 
-# Check available interfaces
+# List all hardware ports to confirm your adapter name
 networksetup -listallhardwareports
 ```
 
+> [!TIP]
+> If your adapter isn't listed in the table above, open an issue or PR — adding support requires a one-line change to `SUPPORTED_ADAPTERS` in `wireless.sh`.
+
 **Permission errors:**
+
 ```bash
-# Verify file permissions
 ls -la /Library/Scripts/NetBasics/wireless.sh
 ls -la /Library/LaunchDaemons/com.computernetworkbasics.wifionoff.plist
 ```
 
-### Manual Testing
-
-Test the core functionality directly:
-
-```bash
-# Run detection script manually
-sudo /Library/Scripts/NetBasics/wireless.sh
-
-# Check current WiFi status
-networksetup -getairportpower Wi-Fi
-
-# List detected wired interfaces
-networksetup -listnetworkserviceorder | grep "Hardware Port" | grep "Ethernet\|LAN\|Thunderbolt\|AX88179A"
-```
-
-### System Requirements
-
-- **macOS Version**: Sonoma (14.x), Sequoia (15.x), or Tahoe (16.x)
-- **Shell**: Bash 4+ (included with macOS)
-- **Privileges**: Administrator access for installation
-- **Network Stack**: Standard macOS networking components
-
-## Authors
-
-- **Ryan Lininger** - Original script concept and implementation
-- **locus313** - Modern macOS compatibility, architecture improvements, and maintenance
-
 ## Contributing
 
-1. Fork the repository and create a branch from `main`
-2. Make your changes — see `AGENTS.md` for architecture details and the maintenance matrix
-3. Run `shellcheck wireless.sh install.sh` and fix any errors
-4. Open a pull request with a description of what changed and how to test it
+1. Fork and branch from `main`
+2. Check `AGENTS.md` for the architecture overview and maintenance matrix
+3. Run `shellcheck wireless.sh install.sh` before opening a PR
+4. Update `CHANGELOG.md` under `[Unreleased]` for any user-facing change
 
-Please update `CHANGELOG.md` under `[Unreleased]` for any user-facing change.
+## Credits
+
+Originally created by Ryan Lininger. Modernized and maintained by [@locus313](https://github.com/locus313).
 
 ## Resources
 
-- [macOS LaunchDaemon Documentation](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
-- [NetworkSetup Command Reference](https://ss64.com/osx/networksetup.html)
-- [Original Implementation](https://web.archive.org/web/20180508004545/www.computernetworkbasics.com/2012/12/automatically-turn-off-wireless-in-osx-including-mountain-lion/)
+- [macOS LaunchDaemon guide](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchdJobs.html)
+- [networksetup reference](https://ss64.com/osx/networksetup.html)
+- [Original blog post (archive)](https://web.archive.org/web/20180508004545/www.computernetworkbasics.com/2012/12/automatically-turn-off-wireless-in-osx-including-mountain-lion/)
