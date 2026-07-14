@@ -23,7 +23,7 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4.4.1
         id: release
 
   upload-archives:
@@ -33,15 +33,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
 
       - name: Build and upload archives
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
         run: |
-          TAG="${{ needs.release-please.outputs.tag_name }}"
           NAME="macos-wireless-autoswitch-${TAG}"
           mkdir "$NAME"
           cp wireless.sh install.sh com.computernetworkbasics.wifionoff.plist README.md LICENSE CHANGELOG.md "$NAME/"
