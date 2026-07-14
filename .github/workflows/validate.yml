@@ -6,11 +6,13 @@ on:
       - 'wireless.sh'
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
+      - 'test/**'
   pull_request:
     paths:
       - 'wireless.sh'
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
+      - 'test/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -25,8 +27,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install xmllint
-        run: sudo apt-get install -y --no-install-recommends libxml2-utils
+      - name: Install xmllint and bats
+        run: sudo apt-get install -y --no-install-recommends libxml2-utils bats
 
       - name: Lint shell scripts
         run: shellcheck wireless.sh install.sh
@@ -48,3 +50,9 @@ jobs:
           grep -q "<key>WatchPaths</key>" com.computernetworkbasics.wifionoff.plist
           grep -q "/Library/Scripts/NetBasics/wireless.sh" com.computernetworkbasics.wifionoff.plist
           grep -q "/Library/Preferences/SystemConfiguration" com.computernetworkbasics.wifionoff.plist
+
+      - name: Install macOS command stubs for Linux CI
+        run: sudo install -m 755 test/helpers/networksetup /usr/sbin/networksetup
+
+      - name: Run BATS tests
+        run: bats test/

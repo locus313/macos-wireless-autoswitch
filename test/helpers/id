@@ -1,0 +1,3 @@
+#!/bin/bash
+# Stub for id; returns ID_OUTPUT (default 501 = non-root) for configure_sudo
+echo "${ID_OUTPUT:-501}"

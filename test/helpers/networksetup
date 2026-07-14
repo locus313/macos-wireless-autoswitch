@@ -1,0 +1,21 @@
+#!/bin/bash
+# Stub for /usr/sbin/networksetup; driven by env vars so each test controls output.
+# Installed to /usr/sbin/networksetup in CI by validate.yml.
+case "$1" in
+    -listnetworkserviceorder)
+        printf '%s\n' "${NETWORKSETUP_SERVICEORDER:-}"
+        ;;
+    -listallhardwareports)
+        printf '%s\n' "${NETWORKSETUP_HARDWAREPORTS:-}"
+        ;;
+    -setairportpower)
+        # Support per-interface exit codes: NETWORKSETUP_SETAIRPORT_EN0_EXIT etc.
+        iface="${2:-}"
+        varname="NETWORKSETUP_SETAIRPORT_${iface^^}_EXIT"
+        varname="${varname//-/_}"
+        exit "${!varname:-${NETWORKSETUP_SETAIRPORT_EXIT:-0}}"
+        ;;
+    *)
+        exit 0
+        ;;
+esac

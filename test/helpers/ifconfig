@@ -1,0 +1,8 @@
+#!/bin/bash
+# Stub for ifconfig; supports per-interface output via IFCONFIG_<IFACE>_OUTPUT,
+# falling back to IFCONFIG_OUTPUT.
+iface="${1:-}"
+# uppercase and replace hyphens so "en0" -> IFCONFIG_EN0_OUTPUT
+varname="IFCONFIG_${iface^^}_OUTPUT"
+varname="${varname//-/_}"
+echo "${!varname:-${IFCONFIG_OUTPUT:-}}"
