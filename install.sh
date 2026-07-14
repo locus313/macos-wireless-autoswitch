@@ -15,7 +15,8 @@
 set -euo pipefail  # Exit on error, undefined variables, and pipe failures
 
 # Constants
-readonly SCRIPT_NAME="install.sh"
+SCRIPT_NAME="$(basename "$0")"
+readonly SCRIPT_NAME
 readonly NETBASICS_PATH="/Library/Scripts/NetBasics"
 readonly LAUNCHDAEMONS_PATH="/Library/LaunchDaemons"
 readonly DAEMON_NAME="com.computernetworkbasics.wifionoff"
@@ -96,19 +97,8 @@ create_directories() {
 # Validate that required source files exist
 #
 validate_source_files() {
-    local missing_files=()
-    
-    if [[ ! -f "$WIRELESS_SCRIPT" ]]; then
-        missing_files+=("$WIRELESS_SCRIPT")
-    fi
-    
-    if [[ ! -f "$DAEMON_PLIST" ]]; then
-        missing_files+=("$DAEMON_PLIST")
-    fi
-    
-    if [[ ${#missing_files[@]} -gt 0 ]]; then
-        log_error_and_exit "Missing required files: ${missing_files[*]}"
-    fi
+    [[ -f "$WIRELESS_SCRIPT" ]] || log_error_and_exit "Missing required file: $WIRELESS_SCRIPT"
+    [[ -f "$DAEMON_PLIST" ]]    || log_error_and_exit "Missing required file: $DAEMON_PLIST"
 }
 
 #
@@ -146,46 +136,38 @@ start_daemon() {
 }
 
 #
+# Copy files, set permissions, and start daemon (shared by install and update)
+#
+_deploy_files() {
+    local wireless_dest="${NETBASICS_PATH}/${WIRELESS_SCRIPT}"
+    $SUDO cp "$WIRELESS_SCRIPT" "$wireless_dest" \
+        || log_error_and_exit "Failed to copy $WIRELESS_SCRIPT to $wireless_dest"
+    $SUDO chmod 755 "$wireless_dest" \
+        || log_error_and_exit "Failed to set permissions on $wireless_dest"
+    log_message "Deployed: $wireless_dest"
+
+    local daemon_dest="${LAUNCHDAEMONS_PATH}/${DAEMON_PLIST}"
+    $SUDO cp "$DAEMON_PLIST" "$daemon_dest" \
+        || log_error_and_exit "Failed to copy $DAEMON_PLIST to $daemon_dest"
+    $SUDO chown root:wheel "$daemon_dest" \
+        || log_error_and_exit "Failed to set ownership on $daemon_dest"
+    $SUDO chmod 644 "$daemon_dest" \
+        || log_error_and_exit "Failed to set permissions on $daemon_dest"
+    log_message "Deployed: $daemon_dest (root:wheel, 644)"
+
+    start_daemon
+}
+
+#
 # Install system components
 #
 install_components() {
     log_message "Starting installation..."
-    
     configure_sudo
     validate_source_files
     create_directories
     stop_daemon
-    
-    # Copy wireless script
-    local wireless_dest="${NETBASICS_PATH}/${WIRELESS_SCRIPT}"
-    if ! $SUDO cp "$WIRELESS_SCRIPT" "$wireless_dest"; then
-        log_error_and_exit "Failed to copy $WIRELESS_SCRIPT to $wireless_dest"
-    fi
-    log_message "Copied: $WIRELESS_SCRIPT -> $wireless_dest"
-    
-    # Set script permissions
-    if ! $SUDO chmod 755 "$wireless_dest"; then
-        log_error_and_exit "Failed to set permissions on $wireless_dest"
-    fi
-    log_message "Set execute permissions on: $wireless_dest"
-    
-    # Copy LaunchDaemon plist
-    local daemon_dest="${LAUNCHDAEMONS_PATH}/${DAEMON_PLIST}"
-    if ! $SUDO cp "$DAEMON_PLIST" "$daemon_dest"; then
-        log_error_and_exit "Failed to copy $DAEMON_PLIST to $daemon_dest"
-    fi
-    log_message "Copied: $DAEMON_PLIST -> $daemon_dest"
-    
-    # Set plist ownership and permissions (644 required for launchctl to load)
-    if ! $SUDO chown root:wheel "$daemon_dest"; then
-        log_error_and_exit "Failed to set ownership on $daemon_dest"
-    fi
-    if ! $SUDO chmod 644 "$daemon_dest"; then
-        log_error_and_exit "Failed to set permissions on $daemon_dest"
-    fi
-    log_message "Set ownership (root:wheel) and permissions (644) on: $daemon_dest"
-    
-    start_daemon
+    _deploy_files
     log_message "Installation completed successfully"
 }
 
@@ -237,39 +219,10 @@ uninstall_components() {
 #
 update_components() {
     log_message "Starting update..."
-    
     configure_sudo
     validate_source_files
     stop_daemon
-    
-    # Update wireless script
-    local wireless_dest="${NETBASICS_PATH}/${WIRELESS_SCRIPT}"
-    if ! $SUDO cp "$WIRELESS_SCRIPT" "$wireless_dest"; then
-        log_error_and_exit "Failed to update $wireless_dest"
-    fi
-    log_message "Updated: $wireless_dest"
-    
-    # Set script permissions
-    if ! $SUDO chmod 755 "$wireless_dest"; then
-        log_error_and_exit "Failed to set permissions on $wireless_dest"
-    fi
-    
-    # Update LaunchDaemon plist
-    local daemon_dest="${LAUNCHDAEMONS_PATH}/${DAEMON_PLIST}"
-    if ! $SUDO cp "$DAEMON_PLIST" "$daemon_dest"; then
-        log_error_and_exit "Failed to update $daemon_dest"
-    fi
-    log_message "Updated: $daemon_dest"
-    
-    # Set plist ownership and permissions (644 required for launchctl to load)
-    if ! $SUDO chown root:wheel "$daemon_dest"; then
-        log_error_and_exit "Failed to set ownership on $daemon_dest"
-    fi
-    if ! $SUDO chmod 644 "$daemon_dest"; then
-        log_error_and_exit "Failed to set permissions on $daemon_dest"
-    fi
-    
-    start_daemon
+    _deploy_files
     log_message "Update completed successfully"
 }
 

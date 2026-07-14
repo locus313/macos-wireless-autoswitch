@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- `wireless.sh`: `SCRIPT_NAME` now uses `$(basename "$0")` instead of a hardcoded string (fixes #39)
+- `wireless.sh`: `get_os_version` simplified from double-awk to `uname -r | cut -d. -f1` (fixes #36)
+- `wireless.sh`: removed unreachable empty-interface guard in `get_interface_ip` (fixes #37)
+- `wireless.sh`: `detect_wired_connection` now returns exit code (0=found, 1=not found) instead of setting `IPFOUND` global; removed `IPFOUND`/`OSVERSION` module-level globals (fixes #38)
+- `install.sh`: `SCRIPT_NAME` now uses `$(basename "$0")` instead of a hardcoded string (fixes #39)
+- `install.sh`: `validate_source_files` simplified from 13-line array accumulator to 2-line guards (fixes #41)
+- `install.sh`: extracted `_deploy_files` helper to eliminate ~20-line duplication between `install_components` and `update_components` (fixes #40)
+
 ### Added
 - `.github/skills/sync-docs`: new Copilot skill that audits `AGENTS.md` and `.github/copilot-instructions.md` against the live source, patches stale values, updates `CHANGELOG.md [Unreleased]`, then commits and pushes
 
