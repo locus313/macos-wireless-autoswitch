@@ -12,199 +12,39 @@ on:
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
+    permissions:
+      contents: read
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v7
-    
-    - name: Install validation tools
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y shellcheck libxml2-utils
-    
-    - name: Validate shell scripts
-      run: |
-        echo "🔍 Validating shell scripts..."
-        
-        # Check if wireless.sh exists and is executable
-        if [ -f "wireless.sh" ]; then
-          echo "✅ wireless.sh exists"
-          
-          # Check shebang
-          if head -n1 wireless.sh | grep -q "#!/bin/bash"; then
-            echo "✅ wireless.sh has correct shebang"
-          else
-            echo "❌ wireless.sh missing or incorrect shebang"
-            exit 1
-          fi
-          
-          # Run shellcheck
-          echo "🔍 Running shellcheck on wireless.sh..."
-          shellcheck wireless.sh || echo "⚠️ Shellcheck warnings found in wireless.sh"
-          
-          # Check for required functions/commands
-          if grep -q "networksetup" wireless.sh; then
-            echo "✅ wireless.sh contains networksetup commands"
-          else
-            echo "❌ wireless.sh missing networksetup commands"
-            exit 1
-          fi
-          
-          if grep -q "setairportpower" wireless.sh; then
-            echo "✅ wireless.sh contains WiFi control logic"
-          else
-            echo "❌ wireless.sh missing WiFi control logic"
-            exit 1
-          fi
-        else
-          echo "❌ wireless.sh not found"
-          exit 1
-        fi
-        
-        # Check install.sh
-        if [ -f "install.sh" ]; then
-          echo "✅ install.sh exists"
-          
-          # Check shebang
-          if head -n1 install.sh | grep -q "#!/bin/bash"; then
-            echo "✅ install.sh has correct shebang"
-          else
-            echo "❌ install.sh missing or incorrect shebang"
-            exit 1
-          fi
-          
-          # Run shellcheck
-          echo "🔍 Running shellcheck on install.sh..."
-          shellcheck install.sh || echo "⚠️ Shellcheck warnings found in install.sh"
-          
-          # Check for required paths
-          if grep -q "/Library/Scripts/NetBasics" install.sh; then
-            echo "✅ install.sh contains correct installation path"
-          else
-            echo "❌ install.sh missing installation path"
-            exit 1
-          fi
-          
-          if grep -q "/Library/LaunchDaemons" install.sh; then
-            echo "✅ install.sh contains LaunchDaemon path"
-          else
-            echo "❌ install.sh missing LaunchDaemon path"
-            exit 1
-          fi
-        else
-          echo "❌ install.sh not found"
-          exit 1
-        fi
-    
-    - name: Validate plist file
-      run: |
-        echo "🔍 Validating plist file..."
-        
-        if [ -f "com.computernetworkbasics.wifionoff.plist" ]; then
-          echo "✅ Plist file exists"
-          
-          # Validate XML structure
-          if xmllint --noout com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist file has valid XML structure"
-          else
-            echo "❌ Plist file has invalid XML structure"
-            exit 1
-          fi
-          
-          # Check for required keys
-          if grep -q "<key>Label</key>" com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist contains Label key"
-          else
-            echo "❌ Plist missing Label key"
-            exit 1
-          fi
-          
-          if grep -q "<key>ProgramArguments</key>" com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist contains ProgramArguments key"
-          else
-            echo "❌ Plist missing ProgramArguments key"
-            exit 1
-          fi
-          
-          if grep -q "<key>WatchPaths</key>" com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist contains WatchPaths key"
-          else
-            echo "❌ Plist missing WatchPaths key"
-            exit 1
-          fi
-          
-          if grep -q "/Library/Scripts/NetBasics/wireless.sh" com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist references correct script path"
-          else
-            echo "❌ Plist missing or incorrect script path"
-            exit 1
-          fi
-          
-          if grep -q "/Library/Preferences/SystemConfiguration" com.computernetworkbasics.wifionoff.plist; then
-            echo "✅ Plist watches correct system path"
-          else
-            echo "❌ Plist missing or incorrect watch path"
-            exit 1
-          fi
-        else
-          echo "❌ Plist file not found"
-          exit 1
-        fi
-    
-    - name: Check file permissions
-      run: |
-        echo "🔍 Checking recommended file permissions..."
-        
-        # Check if shell scripts are executable
-        if [ -x "wireless.sh" ]; then
-          echo "✅ wireless.sh is executable"
-        else
-          echo "⚠️ wireless.sh is not executable (will be set during installation)"
-        fi
-        
-        if [ -x "install.sh" ]; then
-          echo "✅ install.sh is executable"
-        else
-          echo "⚠️ install.sh is not executable"
-          echo "💡 Consider running: chmod +x install.sh"
-        fi
-    
-    - name: Validate macOS compatibility
-      run: |
-        echo "🔍 Checking macOS compatibility markers..."
-        
-        # Check for OS version detection
-        if grep -q "uname -a" wireless.sh; then
-          echo "✅ OS version detection present"
-        else
-          echo "❌ OS version detection missing"
-          exit 1
-        fi
-        
-        # Check for supported OS versions
-        if grep -q "23|24|25" wireless.sh; then
-          echo "✅ Supported macOS versions defined (Sonoma, Sequoia, Tahoe)"
-        else
-          echo "❌ macOS version support not properly defined"
-          exit 1
-        fi
-        
-        # Check for networksetup usage
-        if grep -q "networksetup.*listnetworkserviceorder" wireless.sh; then
-          echo "✅ Network interface detection present"
-        else
-          echo "❌ Network interface detection missing"
-          exit 1
-        fi
-    
-    - name: Summary
-      run: |
-        echo ""
-        echo "🎉 Validation completed successfully!"
-        echo "✅ All core files are properly formatted and contain required components"
-        echo "✅ Shell scripts pass basic syntax validation"
-        echo "✅ Plist file has valid XML structure and required keys"
-        echo "✅ macOS compatibility checks passed"
+      - uses: actions/checkout@v4
+
+      - name: Install xmllint
+        run: sudo apt-get install -y --no-install-recommends libxml2-utils
+
+      - name: Lint shell scripts
+        run: shellcheck wireless.sh install.sh
+
+      - name: Validate plist XML
+        run: xmllint --noout com.computernetworkbasics.wifionoff.plist
+
+      - name: Check required content
+        run: |
+          grep -q "#!/bin/bash" wireless.sh install.sh
+          grep -qE "networksetup.*setairportpower" wireless.sh
+          grep -qE "networksetup.*listnetworkserviceorder" wireless.sh
+          grep -qE "uname -a" wireless.sh
+          grep -qE "23\|24\|25" wireless.sh
+          grep -q "/Library/Scripts/NetBasics" install.sh
+          grep -q "/Library/LaunchDaemons" install.sh
+          grep -q "<key>Label</key>" com.computernetworkbasics.wifionoff.plist
+          grep -q "<key>ProgramArguments</key>" com.computernetworkbasics.wifionoff.plist
+          grep -q "<key>WatchPaths</key>" com.computernetworkbasics.wifionoff.plist
+          grep -q "/Library/Scripts/NetBasics/wireless.sh" com.computernetworkbasics.wifionoff.plist
+          grep -q "/Library/Preferences/SystemConfiguration" com.computernetworkbasics.wifionoff.plist
