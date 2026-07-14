@@ -39,7 +39,7 @@ jobs:
           grep -q "#!/bin/bash" wireless.sh install.sh
           grep -qE "networksetup.*setairportpower" wireless.sh
           grep -qE "networksetup.*listnetworkserviceorder" wireless.sh
-          grep -qE "uname -a" wireless.sh
+          grep -qE "uname -r" wireless.sh
           grep -qE "23\|24\|25" wireless.sh
           grep -q "/Library/Scripts/NetBasics" install.sh
           grep -q "/Library/LaunchDaemons" install.sh
