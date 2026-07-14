@@ -3,6 +3,10 @@ name: Release
 on:
   push:
     branches: [main]
+    paths:
+      - 'wireless.sh'
+      - 'install.sh'
+      - 'com.computernetworkbasics.wifionoff.plist'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
