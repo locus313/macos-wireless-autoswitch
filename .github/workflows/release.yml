@@ -1,70 +1,50 @@
-name: Create Release
+name: Release
 
 on:
-  pull_request:
+  push:
     branches: [main]
     paths:
       - 'wireless.sh'
       - 'install.sh'
       - 'com.computernetworkbasics.wifionoff.plist'
-    types: [closed]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  release:
-    if: github.event.pull_request.merged == true
+  release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
 
+  upload-archives:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write
-
     steps:
       - uses: actions/checkout@v7
         with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: ${{ needs.release-please.outputs.tag_name }}
 
-      - name: Get latest tag
-        id: tag
-        run: |
-          LATEST=$(git describe --tags --abbrev=0 2>/dev/null || echo "v1.0.0")
-          echo "latest=$LATEST" >> $GITHUB_OUTPUT
-
-      - name: Bump patch version
-        id: version
-        run: |
-          V="${{ steps.tag.outputs.latest }}"
-          IFS='.' read -r MAJOR MINOR PATCH <<< "${V#v}"
-          echo "new=v${MAJOR}.${MINOR}.$((PATCH + 1))" >> $GITHUB_OUTPUT
-
-      - name: Update CHANGELOG
-        run: |
-          NEW="${{ steps.version.outputs.new }}"
-          PREV="${{ steps.tag.outputs.latest }}"
-          YEAR=$(date +%Y)
-          sed -i "s/^## \[Unreleased\]$/## [Unreleased]\n\n## [${NEW#v}] – ${YEAR}/" CHANGELOG.md
-          sed -i "s|/compare/.*\.\.\.HEAD|/compare/${NEW}...HEAD|" CHANGELOG.md
-          sed -i "/^\[Unreleased\]:/a [${NEW#v}]: https://github.com/${{ github.repository }}/compare/${PREV}...${NEW}" CHANGELOG.md
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "chore: update CHANGELOG for ${NEW}"
-          git push
-
-      - name: Build archives
-        run: |
-          NAME="macos-wireless-autoswitch-${{ steps.version.outputs.new }}"
-          mkdir "$NAME"
-          cp wireless.sh install.sh com.computernetworkbasics.wifionoff.plist README.md LICENSE CHANGELOG.md "$NAME/"
-          tar -czf "$NAME.tar.gz" "$NAME"
-          zip -r "$NAME.zip" "$NAME"
-          echo "ARCHIVE=$NAME" >> $GITHUB_ENV
-
-      - name: Create release
+      - name: Build and upload archives
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release create "${{ steps.version.outputs.new }}" \
-            --title "${{ steps.version.outputs.new }}" \
-            --generate-notes \
-            "${{ env.ARCHIVE }}.tar.gz" \
-            "${{ env.ARCHIVE }}.zip"
+          TAG="${{ needs.release-please.outputs.tag_name }}"
+          NAME="macos-wireless-autoswitch-${TAG}"
+          mkdir "$NAME"
+          cp wireless.sh install.sh com.computernetworkbasics.wifionoff.plist README.md LICENSE CHANGELOG.md "$NAME/"
+          tar -czf "${NAME}.tar.gz" "$NAME"
+          zip -r "${NAME}.zip" "$NAME"
+          gh release upload "${TAG}" "${NAME}.tar.gz" "${NAME}.zip"
